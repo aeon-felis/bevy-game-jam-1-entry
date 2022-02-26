@@ -33,8 +33,8 @@ impl Plugin for GameSystemsPlugin {
 
 fn setup_camera(mut commands: Commands) {
     let mut camera = OrthographicCameraBundle::new_2d();
-    camera.transform.scale.x *= 0.01;
-    camera.transform.scale.y *= 0.01;
+    camera.transform.scale.x *= 0.02;
+    camera.transform.scale.y *= 0.02;
     camera.transform.translation.y = 2.0;
     commands.spawn_bundle(camera);
 }

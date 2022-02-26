@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
+use ezinput::prelude::{BindingTypeView, InputView, ActionBinding, BindingInputReceiver};
 
 use crate::loading::FontAssets;
 use crate::AppState;
@@ -19,6 +20,11 @@ enum MenuAction {
     ResumeGame,
     BackToMainMenu,
     ExitGame,
+}
+
+#[derive(ezinput_macros::BindingTypeView, PartialEq, Eq, Hash, Clone, Copy, Debug)]
+enum UiBinding {
+    Pause,
 }
 
 impl Plugin for UiPlugin {
@@ -43,13 +49,27 @@ impl Plugin for UiPlugin {
         app.add_system_set(
             SystemSet::on_exit(AppState::Menu).with_system(destroy_menu_on_stage_exit),
         );
-        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(pause_game));
-        app.add_system_set(SystemSet::on_update(AppState::Menu).with_system(unpause_game));
+        app.add_system(pause_unpause_game);
+        app.add_plugin(ezinput::prelude::EZInputPlugin::<UiBinding>::default());
     }
 }
 
 fn setup_ui(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
+    let mut view = InputView::empty();
+    view.add_binding(
+        UiBinding::Pause,
+        &{
+            let mut binding = ActionBinding::from(UiBinding::Pause);
+            binding.receiver(BindingInputReceiver::KeyboardKey(KeyCode::Escape));
+            binding.receiver(BindingInputReceiver::GamepadButton(GamepadButtonType::Start));
+            binding
+        },
+    );
+    commands.spawn()
+        .insert(view)
+        .insert(ezinput::prelude::EZInputKeyboardService::default())
+        .insert(ezinput::prelude::EZInputGamepadService::default());
 }
 
 fn spawn_menu(
@@ -245,25 +265,26 @@ fn destroy_menu_on_stage_exit(
     }
 }
 
-fn pause_game(mut keyboard_input: ResMut<Input<KeyCode>>, mut menu_writer: EventWriter<MenuType>) {
-    if keyboard_input.pressed(KeyCode::Escape) {
-        keyboard_input.reset(KeyCode::Escape);
-        menu_writer.send(MenuType::Pause);
-    }
-}
-
-fn unpause_game(
-    mut keyboard_input: ResMut<Input<KeyCode>>,
+fn pause_unpause_game(
+    input_query: Query<&InputView<UiBinding>>,
+    state: Res<State<AppState>>,
+    mut menu_writer: EventWriter<MenuType>,
     mut action_writer: EventWriter<MenuAction>,
     menu_type_query: Query<&MenuType>,
 ) {
-    if keyboard_input.pressed(KeyCode::Escape) {
-        keyboard_input.reset(KeyCode::Escape);
-        if menu_type_query
-            .iter()
-            .any(|menu_type| matches!(menu_type, MenuType::Pause))
-        {
-            action_writer.send(MenuAction::ResumeGame);
+    if !input_query.iter().any(|input_view| input_view.key(&UiBinding::Pause).just_pressed()) {
+        return;
+    }
+    match state.current() {
+        AppState::Menu => {
+            if menu_type_query.iter().any(|menu_type| matches!(menu_type, MenuType::Pause)) {
+                action_writer.send(MenuAction::ResumeGame);
+            }
+        }
+        AppState::ClearLevelAndThenLoad => {}
+        AppState::LoadLevel => {}
+        AppState::Game => {
+            menu_writer.send(MenuType::Pause);
         }
     }
 }

@@ -21,6 +21,7 @@ default = [
     "bevy/render",
     "bevy/png",
     "bevy/x11",
+    "bevy/bevy_gilrs",
     "bevy_kira_audio/ogg",
 ]
 
@@ -36,6 +37,8 @@ bevy_asset_loader = { version = "0.9" }
 bevy-ui-navigation = "0.13.1"
 rand = "0.8.3"
 bevy_rapier2d = "0.12.1"
+ezinput = "0.2.2"
+ezinput_macros = "0.2.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "0.25", features=["x11"]}
