@@ -221,7 +221,7 @@ fn handle_menu_actions(
     for event in reader.iter() {
         match event {
             MenuAction::StartGame => {
-                state.set(AppState::Game).unwrap();
+                state.set(AppState::ClearLevelAndThenLoad).unwrap();
             }
             MenuAction::ExitGame => {
                 exit.send(bevy::app::AppExit);

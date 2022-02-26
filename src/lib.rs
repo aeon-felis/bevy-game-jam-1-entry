@@ -1,4 +1,6 @@
 mod audio;
+mod components;
+mod game_systems;
 mod loading;
 mod ui;
 
@@ -13,6 +15,8 @@ use bevy::prelude::*;
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
 pub enum AppState {
     Menu,
+    ClearLevelAndThenLoad,
+    LoadLevel,
     Game,
 }
 
@@ -24,6 +28,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(LoadingPlugin);
         app.add_plugin(InternalAudioPlugin);
         app.add_plugin(ui::UiPlugin);
+        app.add_plugin(game_systems::GameSystemsPlugin);
 
         #[cfg(debug_assertions)]
         {

@@ -9,9 +9,9 @@ def check(ctx):
 
 @task
 def build(ctx):
-    cargo['build', '-q'][
+    cargo['build'][
         '--features', 'bevy/dynamic',
-    ]& ERUN.bang
+    ] & TERMINAL_PANEL.size(20)
 
 
 @task
@@ -21,7 +21,7 @@ def run(ctx):
     ].with_env(
         RUST_LOG='pogo_hurdles=info',
         RUST_BACKTRACE='1',
-    ) & BANG
+    ) & TERMINAL_PANEL.size(20)
 
 
 @task
