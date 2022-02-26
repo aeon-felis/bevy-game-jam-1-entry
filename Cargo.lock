@@ -217,6 +217,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-ui-navigation"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2037acb7d36b0438452096e0d411184fb120e3ebfcafb29b24035be96ff6c231"
+dependencies = [
+ "bevy",
+ "non-empty-vec",
+]
+
+[[package]]
 name = "bevy_app"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2161,6 +2171,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "non-empty-vec"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ceeba69aa8d4c53cdceeac8f17eb2656bb88b468bbe6c0889d34edfdea26ec8b"
+
+[[package]]
 name = "ntapi"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2409,6 +2425,7 @@ name = "pogo_hurdles"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-ui-navigation",
  "bevy_asset_loader",
  "bevy_kira_audio",
  "embed-resource",

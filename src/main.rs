@@ -17,5 +17,6 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_plugin(GamePlugin)
+        .add_plugin(bevy_ui_navigation::NavigationPlugin)
         .run();
 }

@@ -4,6 +4,5 @@ use bevy::prelude::*;
 pub struct InternalAudioPlugin;
 
 impl Plugin for InternalAudioPlugin {
-    fn build(&self, _app: &mut App) {
-    }
+    fn build(&self, _app: &mut App) {}
 }

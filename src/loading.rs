@@ -17,9 +17,7 @@ pub struct FontAssets {
 }
 
 #[derive(AssetCollection)]
-pub struct AudioAssets {
-}
+pub struct AudioAssets {}
 
 #[derive(AssetCollection)]
-pub struct TextureAssets {
-}
+pub struct TextureAssets {}
