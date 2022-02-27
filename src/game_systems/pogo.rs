@@ -4,7 +4,7 @@ use ezinput::prelude::{
     ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
 };
 
-use crate::components::DespawnWithLevel;
+use crate::components::{DespawnWithLevel, CameraFollowTarget};
 use crate::AppState;
 
 pub struct PogoPlugin;
@@ -49,6 +49,7 @@ fn spawn_player(mut commands: Commands) {
     body_cmd.insert(ColliderDebugRender::with_id(2));
     body_cmd.insert(ColliderPositionSync::Discrete);
     body_cmd.insert(AutoBalance);
+    body_cmd.insert(CameraFollowTarget);
     body_cmd.insert(DespawnWithLevel);
 
     let mut view = InputView::empty();
