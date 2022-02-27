@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
-use ezinput::prelude::{BindingTypeView, InputView, ActionBinding, BindingInputReceiver};
+use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
 use crate::loading::FontAssets;
 use crate::AppState;
@@ -57,16 +57,16 @@ impl Plugin for UiPlugin {
 fn setup_ui(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
     let mut view = InputView::empty();
-    view.add_binding(
-        UiBinding::Pause,
-        &{
-            let mut binding = ActionBinding::from(UiBinding::Pause);
-            binding.receiver(BindingInputReceiver::KeyboardKey(KeyCode::Escape));
-            binding.receiver(BindingInputReceiver::GamepadButton(GamepadButtonType::Start));
-            binding
-        },
-    );
-    commands.spawn()
+    view.add_binding(UiBinding::Pause, &{
+        let mut binding = ActionBinding::from(UiBinding::Pause);
+        binding.receiver(BindingInputReceiver::KeyboardKey(KeyCode::Escape));
+        binding.receiver(BindingInputReceiver::GamepadButton(
+            GamepadButtonType::Start,
+        ));
+        binding
+    });
+    commands
+        .spawn()
         .insert(view)
         .insert(ezinput::prelude::EZInputKeyboardService::default())
         .insert(ezinput::prelude::EZInputGamepadService::default());
@@ -272,12 +272,18 @@ fn pause_unpause_game(
     mut action_writer: EventWriter<MenuAction>,
     menu_type_query: Query<&MenuType>,
 ) {
-    if !input_query.iter().any(|input_view| input_view.key(&UiBinding::Pause).just_pressed()) {
+    if !input_query
+        .iter()
+        .any(|input_view| input_view.key(&UiBinding::Pause).just_pressed())
+    {
         return;
     }
     match state.current() {
         AppState::Menu => {
-            if menu_type_query.iter().any(|menu_type| matches!(menu_type, MenuType::Pause)) {
+            if menu_type_query
+                .iter()
+                .any(|menu_type| matches!(menu_type, MenuType::Pause))
+            {
                 action_writer.send(MenuAction::ResumeGame);
             }
         }

@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use ezinput::prelude::{BindingTypeView, InputView, ActionBinding, BindingInputReceiver, PressState, AxisState};
+use ezinput::prelude::{
+    ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
+};
 
 use crate::components::DespawnWithLevel;
 use crate::AppState;
@@ -14,6 +16,7 @@ impl Plugin for PogoPlugin {
         app.add_system_set({
             SystemSet::on_update(AppState::Game)
                 .with_system(player_controls)
+                .with_system(automatically_balance_player)
         });
     }
 }
@@ -23,46 +26,49 @@ enum ControlBinding {
     Spin,
 }
 
-fn spawn_player(
-    mut commands: Commands,
-) {
+#[derive(Component)]
+struct AutoBalance;
+
+fn spawn_player(mut commands: Commands) {
     let mut body_cmd = commands.spawn_bundle(RigidBodyBundle {
         body_type: RigidBodyType::Dynamic.into(),
+        position: point![0.0, 4.0].into(),
         mass_properties: MassProperties {
-            local_com: point![0.0, 0.0],
-            inv_mass: 0.0,
-            inv_principal_inertia_sqrt: 0.0,
-        }.into(),
+            local_com: point![0.0, 1.0],
+            inv_mass: 1.0,
+            inv_principal_inertia_sqrt: 1.0,
+        }
+        .into(),
         ..Default::default()
     });
     body_cmd.insert_bundle(ColliderBundle {
         shape: ColliderShape::cuboid(0.5, 0.5).into(),
-        position: Vec2::new(0.0, 4.5).into(),
+        position: Vec2::new(0.0, 0.5).into(),
         ..Default::default()
     });
     body_cmd.insert(ColliderDebugRender::with_id(2));
     body_cmd.insert(ColliderPositionSync::Discrete);
+    body_cmd.insert(AutoBalance);
     body_cmd.insert(DespawnWithLevel);
 
     let mut view = InputView::empty();
-    view.add_binding(
-        ControlBinding::Spin,
-        &{
-            let mut binding = ActionBinding::from(ControlBinding::Spin);
+    view.add_binding(ControlBinding::Spin, &{
+        let mut binding = ActionBinding::from(ControlBinding::Spin);
 
-            for (binding_input_receiver, axis_value) in [
-                (BindingInputReceiver::KeyboardKey(KeyCode::Left), -1.0),
-                (BindingInputReceiver::KeyboardKey(KeyCode::Right), 1.0),
-            ] {
-                binding.receiver(binding_input_receiver);
-                binding.default_axis_value(binding_input_receiver, axis_value);
-            }
+        for (binding_input_receiver, axis_value) in [
+            (BindingInputReceiver::KeyboardKey(KeyCode::Left), -1.0),
+            (BindingInputReceiver::KeyboardKey(KeyCode::Right), 1.0),
+        ] {
+            binding.receiver(binding_input_receiver);
+            binding.default_axis_value(binding_input_receiver, axis_value);
+        }
 
-            binding.receiver(BindingInputReceiver::GamepadAxis(GamepadAxisType::LeftStickX));
+        binding.receiver(BindingInputReceiver::GamepadAxis(
+            GamepadAxisType::LeftStickX,
+        ));
 
-            binding
-        },
-    );
+        binding
+    });
     body_cmd.insert(view);
     body_cmd.insert(ezinput::prelude::EZInputKeyboardService::default());
     body_cmd.insert(ezinput::prelude::EZInputGamepadService::default());
@@ -72,12 +78,13 @@ fn spawn_player(
     let mut stick_cmd = commands.spawn();
     stick_cmd.insert(ColliderParentComponent(ColliderParent {
         handle: body_entity.handle(),
-        pos_wrt_parent: Vec2::new(0.0, 4.0).into(),
+        pos_wrt_parent: Vec2::new(0.0, 0.0).into(),
     }));
     stick_cmd.insert_bundle(ColliderBundle {
         shape: ColliderShape::cuboid(0.1, 0.5).into(),
         material: ColliderMaterial {
             restitution: 2.0,
+            friction: 1.0,
             ..Default::default()
         }
         .into(),
@@ -96,10 +103,30 @@ fn player_controls(
         &RigidBodyMassPropsComponent,
     )>,
 ) {
-    let torque = time.delta().as_secs_f32() * 3.0;
+    let torque = time.delta().as_secs_f32() * 10.0;
     for (input_view, mut velocity, mass_props) in query.iter_mut() {
-        if let Some(AxisState(spin_axis_value, PressState::Pressed { .. })) = input_view.axis(&ControlBinding::Spin).first() {
+        if let Some(AxisState(spin_axis_value, PressState::Pressed { .. })) =
+            input_view.axis(&ControlBinding::Spin).first()
+        {
             velocity.apply_torque_impulse(mass_props, torque * -*spin_axis_value);
         }
+    }
+}
+
+fn automatically_balance_player(
+    time: Res<Time>,
+    mut query: Query<
+        (
+            &RigidBodyPositionComponent,
+            &mut RigidBodyVelocityComponent,
+            &RigidBodyMassPropsComponent,
+        ),
+        With<AutoBalance>,
+    >,
+) {
+    let torque = time.delta().as_secs_f32() * 2.0;
+    for (position, mut velocity, mass_props) in query.iter_mut() {
+        let angle = position.0.position.rotation.angle();
+        velocity.apply_torque_impulse(mass_props, torque * -angle);
     }
 }
