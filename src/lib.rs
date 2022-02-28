@@ -1,5 +1,6 @@
 mod audio;
 mod components;
+mod consts;
 mod game_systems;
 mod loading;
 mod ui;

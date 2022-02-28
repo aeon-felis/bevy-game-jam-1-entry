@@ -4,7 +4,7 @@ use ezinput::prelude::{
     ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
 };
 
-use crate::components::{DespawnWithLevel, CameraFollowTarget};
+use crate::components::{CameraFollowTarget, DespawnWithLevel, Player};
 use crate::AppState;
 
 pub struct PogoPlugin;
@@ -43,6 +43,11 @@ fn spawn_player(mut commands: Commands) {
     });
     body_cmd.insert_bundle(ColliderBundle {
         shape: ColliderShape::cuboid(0.5, 0.5).into(),
+        flags: ColliderFlags {
+            active_events: ActiveEvents::CONTACT_EVENTS,
+            ..Default::default()
+        }
+        .into(),
         position: Vec2::new(0.0, 0.5).into(),
         ..Default::default()
     });
@@ -51,6 +56,7 @@ fn spawn_player(mut commands: Commands) {
     body_cmd.insert(AutoBalance);
     body_cmd.insert(CameraFollowTarget);
     body_cmd.insert(DespawnWithLevel);
+    body_cmd.insert(Player);
 
     let mut view = InputView::empty();
     view.add_binding(ControlBinding::Spin, &{
@@ -83,6 +89,11 @@ fn spawn_player(mut commands: Commands) {
     }));
     stick_cmd.insert_bundle(ColliderBundle {
         shape: ColliderShape::cuboid(0.1, 0.5).into(),
+        flags: ColliderFlags {
+            active_events: ActiveEvents::CONTACT_EVENTS,
+            ..Default::default()
+        }
+        .into(),
         material: ColliderMaterial {
             restitution: 2.0,
             friction: 1.0,
@@ -94,6 +105,7 @@ fn spawn_player(mut commands: Commands) {
     stick_cmd.insert(ColliderDebugRender::with_id(3));
     stick_cmd.insert(ColliderPositionSync::Discrete);
     stick_cmd.insert(DespawnWithLevel);
+    stick_cmd.insert(Player);
 }
 
 fn player_controls(

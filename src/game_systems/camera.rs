@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::AppState;
 use crate::components::CameraFollowTarget;
+use crate::AppState;
 
 pub struct CameraPlugin;
 
@@ -19,17 +19,13 @@ fn setup_camera(mut commands: Commands) {
     camera.transform.scale.x *= 0.02;
     camera.transform.scale.y *= 0.02;
     camera.transform.translation.y = 2.0;
-    commands
-        .spawn_bundle(camera)
-        .insert(CameraBehavior {
-            target: 0.0,
-            velocity: 0.0,
-        });
+    commands.spawn_bundle(camera).insert(CameraBehavior {
+        target: 0.0,
+        velocity: 0.0,
+    });
 }
 
-fn reset_camera(
-    mut query: Query<(&mut CameraBehavior, &mut Transform)>,
-) {
+fn reset_camera(mut query: Query<(&mut CameraBehavior, &mut Transform)>) {
     for (mut camera_behavior, mut camera_transform) in query.iter_mut() {
         *camera_behavior = CameraBehavior {
             target: 0.0,
@@ -47,7 +43,10 @@ struct CameraBehavior {
 
 fn set_camera_target(
     mut camera_query: Query<&mut CameraBehavior>,
-    target_query: Query<&bevy_rapier2d::prelude::RigidBodyPositionComponent, With<CameraFollowTarget>>,
+    target_query: Query<
+        &bevy_rapier2d::prelude::RigidBodyPositionComponent,
+        With<CameraFollowTarget>,
+    >,
 ) {
     for mut camera in camera_query.iter_mut() {
         for target in target_query.iter() {

@@ -6,7 +6,7 @@ use bevy::DefaultPlugins;
 use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
 use bevy_rapier2d::render::RapierRenderPlugin;
 use bevy_ui_navigation::NavigationPlugin;
-use pogo_hurdles::GamePlugin;
+use pogo_hurdling::GamePlugin;
 
 fn main() {
     App::new()

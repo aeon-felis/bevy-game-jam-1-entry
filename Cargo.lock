@@ -2679,7 +2679,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pogo_hurdles"
+name = "pogo_hurdling"
 version = "0.1.0"
 dependencies = [
  "bevy",
