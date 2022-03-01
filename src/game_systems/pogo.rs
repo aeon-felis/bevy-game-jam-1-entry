@@ -4,8 +4,7 @@ use ezinput::prelude::{
     ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
 };
 
-use crate::components::{CameraFollowTarget, DespawnWithLevel, Player, PlayerHead};
-use crate::AppState;
+use crate::global_types::{AppState, CameraFollowTarget, DespawnWithLevel, Player, PlayerHead};
 
 pub struct PogoPlugin;
 

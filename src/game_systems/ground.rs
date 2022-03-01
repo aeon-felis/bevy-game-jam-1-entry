@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::components::{DespawnWithLevel, Ground, PlayerHead};
+use crate::global_types::{
+    AppState, DespawnWithLevel, GameBoundaries, GameOver, Ground, PlayerHead,
+};
 use crate::ui::MenuType;
 use crate::utils::entities_ordered_by_type;
-use crate::{AppState, GameOver};
-
-use super::GameBoundaries;
 
 pub struct GroundPlugin;
 

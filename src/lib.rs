@@ -1,7 +1,7 @@
 mod audio;
-mod components;
 mod consts;
 mod game_systems;
+mod global_types;
 mod loading;
 mod ui;
 mod utils;
@@ -14,19 +14,8 @@ use bevy::app::App;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
-#[derive(Hash, Debug, PartialEq, Eq, Clone)]
-pub enum AppState {
-    Menu,
-    ClearLevelAndThenLoad,
-    LoadLevel,
-    Game,
-}
-
-#[derive(Hash, Debug, PartialEq, Eq, Clone)]
-pub enum GameOver {
-    Injured,
-    Disqualified,
-}
+use self::consts::TRACK_LENGTH;
+use self::global_types::{AppState, GameBoundaries, GameOver};
 
 pub struct GamePlugin;
 
@@ -34,6 +23,10 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_state(AppState::Menu);
         app.add_state::<Option<GameOver>>(None);
+        app.insert_resource(GameBoundaries {
+            left: -10.0,
+            right: TRACK_LENGTH,
+        });
         app.add_plugin(LoadingPlugin);
         app.add_plugin(InternalAudioPlugin);
         app.add_plugin(ui::UiPlugin);

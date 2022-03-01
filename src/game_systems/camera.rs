@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
-use crate::components::CameraFollowTarget;
-use crate::AppState;
+use crate::global_types::{AppState, CameraFollowTarget};
 
 pub struct CameraPlugin;
 

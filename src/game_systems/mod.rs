@@ -6,9 +6,7 @@ mod pogo;
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;
 
-use crate::components::DespawnWithLevel;
-use crate::consts::TRACK_LENGTH;
-use crate::{AppState, GameOver};
+use crate::global_types::{AppState, DespawnWithLevel, GameOver};
 
 pub struct GameSystemsPlugin;
 
@@ -20,10 +18,6 @@ fn create_move_to_state_system(new_state: AppState) -> impl Fn(ResMut<State<AppS
 
 impl Plugin for GameSystemsPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(GameBoundaries {
-            left: -10.0,
-            right: TRACK_LENGTH,
-        });
         app.add_plugin(camera::CameraPlugin);
         app.add_system_set({
             SystemSet::on_enter(AppState::ClearLevelAndThenLoad)
@@ -41,21 +35,6 @@ impl Plugin for GameSystemsPlugin {
         app.add_plugin(pogo::PogoPlugin);
         app.add_plugin(hurdles::HurdlesPlugin);
         app.add_system(enable_disable_physics.with_run_criteria(run_on_state_change));
-    }
-}
-
-pub struct GameBoundaries {
-    pub left: f32,
-    pub right: f32,
-}
-
-impl GameBoundaries {
-    pub fn width(&self) -> f32 {
-        self.right - self.left
-    }
-
-    pub fn center(&self) -> f32 {
-        (self.right + self.left) * 0.5
     }
 }
 

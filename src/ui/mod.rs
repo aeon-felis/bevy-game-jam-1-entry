@@ -3,8 +3,8 @@ use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
 use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
+use crate::global_types::{AppState, GameOver};
 use crate::loading::FontAssets;
-use crate::{AppState, GameOver};
 
 pub struct UiPlugin;
 

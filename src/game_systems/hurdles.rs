@@ -5,13 +5,10 @@ use std::ops::Range;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 
-use crate::components::{DespawnWithLevel, Hurdle, Player};
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
+use crate::global_types::{AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, Player};
 use crate::ui::MenuType;
 use crate::utils::entities_ordered_by_type;
-use crate::{AppState, GameOver};
-
-use super::GameBoundaries;
 
 pub struct HurdlesPlugin;
 
