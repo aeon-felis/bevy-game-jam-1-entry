@@ -65,13 +65,16 @@ fn handle_camera_movement(
     let acceleration = duration * 10.0;
     for (mut camera_behavior, mut camera_transform) in query.iter_mut() {
         let to_move = camera_behavior.target - camera_transform.translation.x;
-        let target_velocity = if 2.0 < to_move.abs() {
+        let target_velocity = if 0.2 < to_move.abs() {
             to_move.signum() * 50.0
         } else {
             0.0
         };
         let target_acceleration = target_velocity - camera_behavior.velocity;
         camera_behavior.velocity += target_acceleration.signum() * acceleration;
+        if target_velocity.abs() < camera_behavior.velocity.abs() {
+            camera_behavior.velocity = target_velocity;
+        }
         camera_transform.translation.x += camera_behavior.velocity * duration;
     }
 }

@@ -21,11 +21,17 @@ pub enum AppState {
     Game,
 }
 
+#[derive(Hash, Debug, PartialEq, Eq, Clone)]
+pub enum GameOver {
+    Disqualified,
+}
+
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_state(AppState::Menu);
+        app.add_state::<Option<GameOver>>(None);
         app.add_plugin(LoadingPlugin);
         app.add_plugin(InternalAudioPlugin);
         app.add_plugin(ui::UiPlugin);

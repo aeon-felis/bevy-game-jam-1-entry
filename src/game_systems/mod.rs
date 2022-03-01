@@ -8,7 +8,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::components::DespawnWithLevel;
 use crate::consts::TRACK_LENGTH;
-use crate::AppState;
+use crate::{AppState, GameOver};
 
 pub struct GameSystemsPlugin;
 
@@ -29,6 +29,9 @@ impl Plugin for GameSystemsPlugin {
             SystemSet::on_enter(AppState::ClearLevelAndThenLoad)
                 .with_system(clear_level)
                 .with_system(create_move_to_state_system(AppState::LoadLevel))
+                .with_system(|mut game_over_state: ResMut<State<Option<GameOver>>>| {
+                    let _ = game_over_state.set(None);
+                })
         });
         app.add_system_set({
             SystemSet::on_enter(AppState::LoadLevel)
@@ -109,15 +112,16 @@ fn add_ground(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
 fn enable_disable_physics(
     state: Res<State<AppState>>,
     mut rapier_configuration: ResMut<bevy_rapier2d::physics::RapierConfiguration>,
+    game_over_state: Res<State<Option<GameOver>>>,
 ) {
-    match state.current() {
+    let set_to = match state.current() {
         AppState::Menu | AppState::ClearLevelAndThenLoad | AppState::LoadLevel => {
-            rapier_configuration.physics_pipeline_active = false;
-            rapier_configuration.query_pipeline_active = false;
+            game_over_state.current().is_some()
         }
         AppState::Game => {
-            rapier_configuration.physics_pipeline_active = true;
-            rapier_configuration.query_pipeline_active = true;
+            true
         }
-    }
+    };
+    rapier_configuration.physics_pipeline_active = set_to;
+    rapier_configuration.query_pipeline_active = set_to;
 }

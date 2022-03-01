@@ -7,7 +7,8 @@ use rand::Rng;
 
 use crate::components::{DespawnWithLevel, Hurdle, Player};
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
-use crate::AppState;
+use crate::{AppState, GameOver};
+use crate::ui::MenuType;
 
 use super::GameBoundaries;
 
@@ -87,6 +88,7 @@ fn detect_hurdle_touch(
     mut reader: EventReader<ContactEvent>,
     hurdle_query: Query<(), With<Hurdle>>,
     player_query: Query<(), With<Player>>,
+    mut menu_writer: EventWriter<MenuType>,
 ) {
     for event in reader.iter() {
         if let ContactEvent::Started(handle1, handle2) = event {
@@ -108,8 +110,7 @@ fn detect_hurdle_touch(
                 None
             };
             if res.is_some() {
-                // TODO: disqualify player
-                warn!("Player hit hurdle");
+                menu_writer.send(MenuType::GameOver(GameOver::Disqualified));
             }
         }
     }

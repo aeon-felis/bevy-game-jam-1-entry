@@ -4,14 +4,15 @@ use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
 use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
 use crate::loading::FontAssets;
-use crate::AppState;
+use crate::{AppState, GameOver};
 
 pub struct UiPlugin;
 
 #[derive(Component, Clone)]
-enum MenuType {
+pub enum MenuType {
     Main,
     Pause,
+    GameOver(GameOver),
 }
 
 #[derive(Component, Clone)]
@@ -77,6 +78,7 @@ fn spawn_menu(
     mut commands: Commands,
     font_assets: Res<FontAssets>,
     mut state: ResMut<State<AppState>>,
+    mut game_over_state: ResMut<State<Option<GameOver>>>,
     existing_menu_items_query: Query<Entity, With<MenuType>>,
 ) {
     let menu_type = if let Some(menu_type) = reader.iter().last() {
@@ -90,7 +92,7 @@ fn spawn_menu(
     let mut menu_creator = MenuCreator {
         commands: &mut commands,
         top: 200.0,
-        left: 300.0,
+        left: 100.0,
         padding: Vec2::new(10.0, 10.0),
         size: Vec2::new(150.0, 65.0),
         font: font_assets.fira_sans.clone(),
@@ -106,6 +108,18 @@ fn spawn_menu(
             menu_creator.button(0, 0, "Resume", MenuAction::ResumeGame);
             menu_creator.button(0, 1, "Main Menu", MenuAction::BackToMainMenu);
             menu_creator.button(0, 2, "Exit", MenuAction::ExitGame);
+        }
+        MenuType::GameOver(game_over_reason) => {
+            if state.current() != &AppState::Game {
+                return;
+            }
+            game_over_state.set(Some(game_over_reason.clone())).unwrap();
+            menu_creator.button(0, 0, "Main Menu", MenuAction::BackToMainMenu);
+            menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
+
+            menu_creator.text(1, 0, match game_over_reason {
+                GameOver::Disqualified => "DISQUALIFIED!",
+            });
         }
     }
     if state.current() != &AppState::Menu {
@@ -126,6 +140,7 @@ struct MenuCreator<'a, 'w, 's> {
 
 impl MenuCreator<'_, '_, '_> {
     fn button(&mut self, x: i32, y: i32, text: &str, action: MenuAction) -> Entity {
+        let text_child = self.text_child(text);
         let offset = (self.size + self.padding) * Vec2::new(x as f32, y as f32);
         let mut cmd = self.commands.spawn_bundle(ButtonBundle {
             style: Style {
@@ -149,30 +164,75 @@ impl MenuCreator<'_, '_, '_> {
         cmd.insert(Focusable::default());
         cmd.insert(action);
         cmd.insert(self.menu_type.clone());
+        cmd.add_child(text_child);
         // .insert(role.clone())
-        cmd.with_children(|parent| {
-            parent.spawn_bundle(TextBundle {
-                text: Text::with_section(
-                    text,
-                    TextStyle {
-                        font: self.font.clone(),
-                        font_size: 30.0,
-                        color: Color::BLACK,
-                        ..Default::default()
-                    },
-                    TextAlignment {
-                        vertical: VerticalAlign::Center,
-                        horizontal: HorizontalAlign::Center,
-                    },
-                ),
-                ..Default::default()
-            });
-        });
+        // cmd.with_children(|parent| {
+            // parent.spawn_bundle(TextBundle {
+                // text: Text::with_section(
+                    // text,
+                    // TextStyle {
+                        // font: self.font.clone(),
+                        // font_size: 30.0,
+                        // color: Color::BLACK,
+                        // ..Default::default()
+                    // },
+                    // TextAlignment {
+                        // vertical: VerticalAlign::Center,
+                        // horizontal: HorizontalAlign::Center,
+                    // },
+                // ),
+                // ..Default::default()
+            // });
+        // });
         if self.default_focus {
             cmd.insert(DefaultFocus);
             self.default_focus = false;
         }
         cmd.id()
+    }
+
+    fn text(&mut self, x: i32, y: i32, text: &str) -> Entity {
+        let text_child = self.text_child(text);
+        let offset = (self.size + self.padding) * Vec2::new(x as f32, y as f32);
+        let mut cmd = self.commands.spawn_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Px(self.size.x), Val::Px(self.size.y)),
+                position_type: PositionType::Absolute,
+                justify_content: JustifyContent::Center,
+                position: Rect {
+                    left: Val::Px(self.left + offset.x),
+                    top: Val::Px(self.top + offset.y),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            color: Color::NONE.into(),
+            ..Default::default()
+        });
+        cmd.insert(Focusable::default());
+        cmd.insert(self.menu_type.clone());
+
+        cmd.add_child(text_child);
+        cmd.id()
+    }
+
+    fn text_child(&mut self, text: &str) -> Entity {
+        self.commands.spawn_bundle(TextBundle {
+            text: Text::with_section(
+                      text,
+                      TextStyle {
+                          font: self.font.clone(),
+                          font_size: 30.0,
+                          color: Color::BLACK,
+                          ..Default::default()
+                      },
+                      TextAlignment {
+                          vertical: VerticalAlign::Center,
+                          horizontal: HorizontalAlign::Center,
+                      },
+                  ),
+                  ..Default::default()
+        }).id()
     }
 }
 
