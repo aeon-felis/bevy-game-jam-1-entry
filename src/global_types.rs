@@ -12,6 +12,8 @@ pub enum AppState {
 pub enum GameOver {
     Injured,
     Disqualified,
+    WrongWay,
+    FinishLine,
 }
 
 pub struct GameBoundaries {

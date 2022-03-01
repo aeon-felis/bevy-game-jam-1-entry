@@ -30,11 +30,14 @@ enum UiBinding {
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
+        #[derive(SystemLabel, PartialEq, Eq, Debug, Hash, Clone)]
+        struct SpawnMenuLabel;
+
         app.add_startup_system(setup_ui);
         app.init_resource::<InputMapping>();
         app.add_event::<MenuType>();
         app.add_event::<MenuAction>();
-        app.add_system(spawn_menu);
+        app.add_system(spawn_menu.label(SpawnMenuLabel));
         app.add_startup_system(|mut writer: EventWriter<MenuType>| {
             writer.send(MenuType::Main);
         });
@@ -44,7 +47,7 @@ impl Plugin for UiPlugin {
                 .with_system(bevy_ui_navigation::systems::default_mouse_input)
                 .with_system(bevy_ui_navigation::systems::default_gamepad_input)
         });
-        app.add_system(focus_default);
+        app.add_system(focus_default.before(SpawnMenuLabel));
         app.add_system(handle_nav_events);
         app.add_system(handle_menu_actions);
         app.add_system_set(
@@ -117,14 +120,22 @@ fn spawn_menu(
             menu_creator.button(0, 0, "Main Menu", MenuAction::BackToMainMenu);
             menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
 
-            menu_creator.text(
-                1,
-                0,
-                match game_over_reason {
-                    GameOver::Disqualified => "DISQUALIFIED!",
-                    GameOver::Injured => "INJURED!",
-                },
-            );
+            match game_over_reason {
+                GameOver::Injured | GameOver::Disqualified => {
+                    let caption = match game_over_reason {
+                        GameOver::Disqualified => "DISQUALIFIED!",
+                        GameOver::Injured => "INJURED!",
+                        _ => panic!(),
+                    };
+                    menu_creator.text(1, 0, caption, Color::RED);
+                }
+                GameOver::WrongWay => {
+                    menu_creator.text(1, 0, "that's the wrong way...", Color::RED);
+                }
+                GameOver::FinishLine => {
+                    menu_creator.text(1, 0, "FINISH!", Color::GREEN);
+                }
+            }
         }
     }
     if state.current() != &AppState::Menu {
@@ -145,7 +156,7 @@ struct MenuCreator<'a, 'w, 's> {
 
 impl MenuCreator<'_, '_, '_> {
     fn button(&mut self, x: i32, y: i32, text: &str, action: MenuAction) -> Entity {
-        let text_child = self.text_child(text);
+        let text_child = self.text_child(text, Color::BLACK);
         let offset = (self.size + self.padding) * Vec2::new(x as f32, y as f32);
         let mut cmd = self.commands.spawn_bundle(ButtonBundle {
             style: Style {
@@ -177,8 +188,8 @@ impl MenuCreator<'_, '_, '_> {
         cmd.id()
     }
 
-    fn text(&mut self, x: i32, y: i32, text: &str) -> Entity {
-        let text_child = self.text_child(text);
+    fn text(&mut self, x: i32, y: i32, text: &str, color: Color) -> Entity {
+        let text_child = self.text_child(text, color);
         let offset = (self.size + self.padding) * Vec2::new(x as f32, y as f32);
         let mut cmd = self.commands.spawn_bundle(NodeBundle {
             style: Style {
@@ -201,7 +212,7 @@ impl MenuCreator<'_, '_, '_> {
         cmd.id()
     }
 
-    fn text_child(&mut self, text: &str) -> Entity {
+    fn text_child(&mut self, text: &str, color: Color) -> Entity {
         self.commands
             .spawn_bundle(TextBundle {
                 text: Text::with_section(
@@ -209,7 +220,7 @@ impl MenuCreator<'_, '_, '_> {
                     TextStyle {
                         font: self.font.clone(),
                         font_size: 30.0,
-                        color: Color::BLACK,
+                        color,
                         ..Default::default()
                     },
                     TextAlignment {

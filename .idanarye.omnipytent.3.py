@@ -19,7 +19,7 @@ def run(ctx):
     cargo['run'][
         '--features', 'bevy/dynamic',
     ].with_env(
-        RUST_LOG='pogo_hurdles=info',
+        RUST_LOG='pogo_hurdling=info',
         RUST_BACKTRACE='1',
     ) & TERMINAL_PANEL.size(20)
 
