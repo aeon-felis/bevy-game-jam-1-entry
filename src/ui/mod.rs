@@ -117,9 +117,14 @@ fn spawn_menu(
             menu_creator.button(0, 0, "Main Menu", MenuAction::BackToMainMenu);
             menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
 
-            menu_creator.text(1, 0, match game_over_reason {
-                GameOver::Disqualified => "DISQUALIFIED!",
-            });
+            menu_creator.text(
+                1,
+                0,
+                match game_over_reason {
+                    GameOver::Disqualified => "DISQUALIFIED!",
+                    GameOver::Injured => "INJURED!",
+                },
+            );
         }
     }
     if state.current() != &AppState::Menu {
@@ -165,25 +170,6 @@ impl MenuCreator<'_, '_, '_> {
         cmd.insert(action);
         cmd.insert(self.menu_type.clone());
         cmd.add_child(text_child);
-        // .insert(role.clone())
-        // cmd.with_children(|parent| {
-            // parent.spawn_bundle(TextBundle {
-                // text: Text::with_section(
-                    // text,
-                    // TextStyle {
-                        // font: self.font.clone(),
-                        // font_size: 30.0,
-                        // color: Color::BLACK,
-                        // ..Default::default()
-                    // },
-                    // TextAlignment {
-                        // vertical: VerticalAlign::Center,
-                        // horizontal: HorizontalAlign::Center,
-                    // },
-                // ),
-                // ..Default::default()
-            // });
-        // });
         if self.default_focus {
             cmd.insert(DefaultFocus);
             self.default_focus = false;
@@ -209,7 +195,6 @@ impl MenuCreator<'_, '_, '_> {
             color: Color::NONE.into(),
             ..Default::default()
         });
-        cmd.insert(Focusable::default());
         cmd.insert(self.menu_type.clone());
 
         cmd.add_child(text_child);
@@ -217,22 +202,24 @@ impl MenuCreator<'_, '_, '_> {
     }
 
     fn text_child(&mut self, text: &str) -> Entity {
-        self.commands.spawn_bundle(TextBundle {
-            text: Text::with_section(
-                      text,
-                      TextStyle {
-                          font: self.font.clone(),
-                          font_size: 30.0,
-                          color: Color::BLACK,
-                          ..Default::default()
-                      },
-                      TextAlignment {
-                          vertical: VerticalAlign::Center,
-                          horizontal: HorizontalAlign::Center,
-                      },
-                  ),
-                  ..Default::default()
-        }).id()
+        self.commands
+            .spawn_bundle(TextBundle {
+                text: Text::with_section(
+                    text,
+                    TextStyle {
+                        font: self.font.clone(),
+                        font_size: 30.0,
+                        color: Color::BLACK,
+                        ..Default::default()
+                    },
+                    TextAlignment {
+                        vertical: VerticalAlign::Center,
+                        horizontal: HorizontalAlign::Center,
+                    },
+                ),
+                ..Default::default()
+            })
+            .id()
     }
 }
 

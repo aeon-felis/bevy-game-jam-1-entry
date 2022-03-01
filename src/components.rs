@@ -10,4 +10,10 @@ pub struct CameraFollowTarget;
 pub struct Player;
 
 #[derive(Component)]
+pub struct PlayerHead;
+
+#[derive(Component)]
 pub struct Hurdle;
+
+#[derive(Component)]
+pub struct Ground;

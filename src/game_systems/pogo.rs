@@ -4,7 +4,7 @@ use ezinput::prelude::{
     ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
 };
 
-use crate::components::{CameraFollowTarget, DespawnWithLevel, Player};
+use crate::components::{CameraFollowTarget, DespawnWithLevel, Player, PlayerHead};
 use crate::AppState;
 
 pub struct PogoPlugin;
@@ -57,6 +57,7 @@ fn spawn_player(mut commands: Commands) {
     body_cmd.insert(CameraFollowTarget);
     body_cmd.insert(DespawnWithLevel);
     body_cmd.insert(Player);
+    body_cmd.insert(PlayerHead);
 
     let mut view = InputView::empty();
     view.add_binding(ControlBinding::Spin, &{

@@ -4,6 +4,7 @@ mod consts;
 mod game_systems;
 mod loading;
 mod ui;
+mod utils;
 
 use crate::audio::InternalAudioPlugin;
 use crate::loading::LoadingPlugin;
@@ -23,6 +24,7 @@ pub enum AppState {
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
 pub enum GameOver {
+    Injured,
     Disqualified,
 }
 

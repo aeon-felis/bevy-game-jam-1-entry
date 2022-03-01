@@ -7,8 +7,9 @@ use rand::Rng;
 
 use crate::components::{DespawnWithLevel, Hurdle, Player};
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
-use crate::{AppState, GameOver};
 use crate::ui::MenuType;
+use crate::utils::entities_ordered_by_type;
+use crate::{AppState, GameOver};
 
 use super::GameBoundaries;
 
@@ -92,24 +93,13 @@ fn detect_hurdle_touch(
 ) {
     for event in reader.iter() {
         if let ContactEvent::Started(handle1, handle2) = event {
-            let entity1 = handle1.entity();
-            let entity2 = handle2.entity();
-            let res = if let Ok(_) = hurdle_query.get(entity1) {
-                if let Ok(_) = player_query.get(entity2) {
-                    Some((entity1, entity2))
-                } else {
-                    None
-                }
-            } else if let Ok(_) = hurdle_query.get(entity2) {
-                if let Ok(_) = player_query.get(entity1) {
-                    Some((entity2, entity1))
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
-            if res.is_some() {
+            if entities_ordered_by_type!(
+                [handle1.entity(), handle2.entity()],
+                hurdle_query,
+                player_query
+            )
+            .is_some()
+            {
                 menu_writer.send(MenuType::GameOver(GameOver::Disqualified));
             }
         }
