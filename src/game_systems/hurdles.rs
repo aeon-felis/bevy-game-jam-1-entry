@@ -7,6 +7,7 @@ use rand::Rng;
 
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
 use crate::global_types::{AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, Player};
+use crate::loading::TextureAssets;
 use crate::ui::MenuType;
 use crate::utils::entities_ordered_by_type;
 
@@ -57,7 +58,11 @@ fn distribute_distances(max_num: usize, over_range: Range<f32>, min_size: f32) -
         .collect()
 }
 
-fn add_hurdles(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
+fn add_hurdles(
+    mut commands: Commands,
+    game_boundaries: Res<GameBoundaries>,
+    texture_assets: Res<TextureAssets>,
+) {
     let allowed_width = game_boundaries.right - BEFORE_FIRST;
     let placements = distribute_distances(
         (allowed_width / HURDLE_SPACING) as usize,
@@ -75,7 +80,14 @@ fn add_hurdles(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
             shape: ColliderShape::cuboid(HURDLE_WIDTH * 0.5, HURDLE_HEIGHT * 0.5).into(),
             ..Default::default()
         });
-        cmd.insert(ColliderDebugRender::with_id(5));
+        cmd.insert_bundle(SpriteBundle {
+            sprite: Sprite {
+                custom_size: Some(Vec2::new(2.0, 2.0)),
+                ..Default::default()
+            },
+            texture: texture_assets.hurdle.clone(),
+            ..Default::default()
+        });
         cmd.insert(ColliderPositionSync::Discrete);
         cmd.insert(DespawnWithLevel);
         cmd.insert(Hurdle);

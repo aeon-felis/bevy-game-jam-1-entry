@@ -24,4 +24,6 @@ pub struct AudioAssets {}
 pub struct TextureAssets {
     #[asset(path = "sprites/pogo-player.png")]
     pub pogo_player: Handle<Image>,
+    #[asset(path = "sprites/hurdle.png")]
+    pub hurdle: Handle<Image>,
 }
