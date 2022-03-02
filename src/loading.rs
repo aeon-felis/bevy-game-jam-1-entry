@@ -7,6 +7,7 @@ pub struct LoadingPlugin;
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
         app.init_collection::<FontAssets>();
+        app.init_collection::<TextureAssets>();
     }
 }
 
@@ -20,4 +21,7 @@ pub struct FontAssets {
 pub struct AudioAssets {}
 
 #[derive(AssetCollection)]
-pub struct TextureAssets {}
+pub struct TextureAssets {
+    #[asset(path = "sprites/pogo-player.png")]
+    pub pogo_player: Handle<Image>,
+}

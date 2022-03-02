@@ -8,6 +8,7 @@ use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
     PlayerStatus,
 };
+use crate::loading::TextureAssets;
 use crate::ui::MenuType;
 
 pub struct PogoPlugin;
@@ -34,8 +35,8 @@ enum ControlBinding {
 #[derive(Component)]
 struct AutoBalance;
 
-fn spawn_player(mut commands: Commands) {
-    let mut body_cmd = commands.spawn_bundle(RigidBodyBundle {
+fn spawn_player(mut commands: Commands, texture_assets: Res<TextureAssets>) {
+    let mut player_cmd = commands.spawn_bundle(RigidBodyBundle {
         body_type: RigidBodyType::Dynamic.into(),
         position: point![0.0, 4.0].into(),
         mass_properties: MassProperties {
@@ -51,23 +52,22 @@ fn spawn_player(mut commands: Commands) {
         .into(),
         ..Default::default()
     });
-    body_cmd.insert_bundle(ColliderBundle {
-        shape: ColliderShape::cuboid(0.5, 0.5).into(),
-        flags: ColliderFlags {
-            active_events: ActiveEvents::CONTACT_EVENTS,
+    player_cmd.insert_bundle(SpriteBundle {
+        sprite: Sprite {
+            custom_size: Some(Vec2::new(2.0, 2.0)),
             ..Default::default()
-        }
-        .into(),
-        position: Vec2::new(0.0, 0.5).into(),
+        },
+        transform: Transform {
+            translation: Vec3::new(0.0, 0.0, 0.1),
+            ..Default::default()
+        },
+        texture: texture_assets.pogo_player.clone(),
         ..Default::default()
     });
-    body_cmd.insert(ColliderDebugRender::with_id(2));
-    body_cmd.insert(ColliderPositionSync::Discrete);
-    body_cmd.insert(AutoBalance);
-    body_cmd.insert(CameraFollowTarget);
-    body_cmd.insert(DespawnWithLevel);
-    body_cmd.insert(Player);
-    body_cmd.insert(PlayerHead);
+    player_cmd.insert(DespawnWithLevel);
+    player_cmd.insert(AutoBalance);
+    player_cmd.insert(RigidBodyPositionSync::Discrete);
+    player_cmd.insert(CameraFollowTarget);
 
     let mut view = InputView::empty();
     view.add_binding(ControlBinding::Spin, &{
@@ -87,19 +87,37 @@ fn spawn_player(mut commands: Commands) {
 
         binding
     });
-    body_cmd.insert(view);
-    body_cmd.insert(ezinput::prelude::EZInputKeyboardService::default());
-    body_cmd.insert(ezinput::prelude::EZInputGamepadService::default());
+    player_cmd.insert(view);
+    player_cmd.insert(ezinput::prelude::EZInputKeyboardService::default());
+    player_cmd.insert(ezinput::prelude::EZInputGamepadService::default());
 
-    let body_entity = body_cmd.id();
+    let player_entity = player_cmd.id();
+
+    let mut body_cmd = commands.spawn();
+    body_cmd.insert(ColliderParentComponent(ColliderParent {
+        handle: player_entity.handle(),
+        pos_wrt_parent: Vec2::new(0.0, 0.25).into(),
+    }));
+    body_cmd.insert_bundle(ColliderBundle {
+        shape: ColliderShape::cuboid(0.5, 0.75).into(),
+        flags: ColliderFlags {
+            active_events: ActiveEvents::CONTACT_EVENTS,
+            ..Default::default()
+        }
+        .into(),
+        position: Vec2::new(0.0, 1.0).into(),
+        ..Default::default()
+    });
+    body_cmd.insert(Player);
+    body_cmd.insert(PlayerHead);
 
     let mut stick_cmd = commands.spawn();
     stick_cmd.insert(ColliderParentComponent(ColliderParent {
-        handle: body_entity.handle(),
-        pos_wrt_parent: Vec2::new(0.0, 0.0).into(),
+        handle: player_entity.handle(),
+        pos_wrt_parent: Vec2::new(0.0, -0.75).into(),
     }));
     stick_cmd.insert_bundle(ColliderBundle {
-        shape: ColliderShape::cuboid(0.1, 0.5).into(),
+        shape: ColliderShape::cuboid(0.1, 0.25).into(),
         flags: ColliderFlags {
             active_events: ActiveEvents::CONTACT_EVENTS,
             ..Default::default()
@@ -113,8 +131,6 @@ fn spawn_player(mut commands: Commands) {
         .into(),
         ..Default::default()
     });
-    stick_cmd.insert(ColliderDebugRender::with_id(3));
-    stick_cmd.insert(ColliderPositionSync::Discrete);
     stick_cmd.insert(DespawnWithLevel);
     stick_cmd.insert(Player);
 }
