@@ -399,6 +399,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_embedded_assets"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8b2a2cac146732484758e5057609b1bede38b8e873b755a7af5c408d27b1aa1"
+dependencies = [
+ "bevy",
+ "cargo-emit",
+]
+
+[[package]]
 name = "bevy_gilrs"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -898,6 +908,12 @@ dependencies = [
  "log",
  "nix 0.18.0",
 ]
+
+[[package]]
+name = "cargo-emit"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1582e1c9e755dd6ad6b224dcffb135d199399a4568d454bd89fe515ca8425695"
 
 [[package]]
 name = "cargo-manifest"
@@ -2685,6 +2701,7 @@ dependencies = [
  "bevy",
  "bevy-ui-navigation",
  "bevy_asset_loader",
+ "bevy_embedded_assets",
  "bevy_kira_audio",
  "bevy_rapier2d",
  "embed-resource",

@@ -39,6 +39,7 @@ rand = "0.8.3"
 bevy_rapier2d = "0.12.1"
 ezinput = "0.2.2"
 ezinput_macros = "0.2.0"
+bevy_embedded_assets = "0.2.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "0.25", features=["x11"]}

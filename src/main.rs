@@ -9,19 +9,23 @@ use bevy_ui_navigation::NavigationPlugin;
 use pogo_hurdling::GamePlugin;
 
 fn main() {
-    App::new()
-        .insert_resource(Msaa { samples: 1 })
-        .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
-        .insert_resource(WindowDescriptor {
-            width: 800.,
-            height: 600.,
-            title: "Idan Arye".to_string(),
-            ..Default::default()
-        })
-        .add_plugins(DefaultPlugins)
-        .add_plugin(GamePlugin)
-        .add_plugin(NavigationPlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierRenderPlugin)
-        .run();
+    let mut app = App::new();
+    app.insert_resource(Msaa { samples: 1 });
+    app.insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)));
+    app.insert_resource(WindowDescriptor {
+        width: 800.,
+        height: 600.,
+        title: "Idan Arye".to_string(),
+        ..Default::default()
+    });
+    app.add_plugins_with(DefaultPlugins, |group| {
+        #[cfg(not(debug_assertions))]
+        group.add_before::<bevy::asset::AssetPlugin, _>(bevy_embedded_assets::EmbeddedAssetPlugin);
+        group
+    });
+    app.add_plugin(GamePlugin);
+    app.add_plugin(NavigationPlugin);
+    app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
+    app.add_plugin(RapierRenderPlugin);
+    app.run();
 }
