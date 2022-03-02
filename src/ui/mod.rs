@@ -1,14 +1,17 @@
+mod score;
+
 use bevy::prelude::*;
 use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
 use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
-use crate::global_types::{AppState, GameOver};
+use crate::global_types::{AppState, GameOver, PlayerStatus, SpawnMenuSystemLabel};
 use crate::loading::FontAssets;
+use crate::ui::score::ScorePlugin;
 
 pub struct UiPlugin;
 
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Debug)]
 pub enum MenuType {
     Main,
     Pause,
@@ -30,14 +33,14 @@ enum UiBinding {
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        #[derive(SystemLabel, PartialEq, Eq, Debug, Hash, Clone)]
-        struct SpawnMenuLabel;
-
         app.add_startup_system(setup_ui);
         app.init_resource::<InputMapping>();
         app.add_event::<MenuType>();
         app.add_event::<MenuAction>();
-        app.add_system(spawn_menu.label(SpawnMenuLabel));
+
+        app.add_plugin(ScorePlugin);
+
+        app.add_system(spawn_menu.label(SpawnMenuSystemLabel));
         app.add_startup_system(|mut writer: EventWriter<MenuType>| {
             writer.send(MenuType::Main);
         });
@@ -47,7 +50,7 @@ impl Plugin for UiPlugin {
                 .with_system(bevy_ui_navigation::systems::default_mouse_input)
                 .with_system(bevy_ui_navigation::systems::default_gamepad_input)
         });
-        app.add_system(focus_default.before(SpawnMenuLabel));
+        app.add_system(focus_default);
         app.add_system(handle_nav_events);
         app.add_system(handle_menu_actions);
         app.add_system_set(
@@ -83,6 +86,7 @@ fn spawn_menu(
     mut state: ResMut<State<AppState>>,
     mut game_over_state: ResMut<State<Option<GameOver>>>,
     existing_menu_items_query: Query<Entity, With<MenuType>>,
+    player_status: Res<PlayerStatus>,
 ) {
     let menu_type = if let Some(menu_type) = reader.iter().last() {
         menu_type
@@ -128,12 +132,27 @@ fn spawn_menu(
                         _ => panic!(),
                     };
                     menu_creator.text(1, 0, caption, Color::RED);
+                    menu_creator.text(
+                        1,
+                        1,
+                        &format!(
+                            "Traveled {:.1}m before failing",
+                            player_status.distance_traveled
+                        ),
+                        Color::BLACK,
+                    );
                 }
                 GameOver::WrongWay => {
                     menu_creator.text(1, 0, "that's the wrong way...", Color::RED);
                 }
                 GameOver::FinishLine => {
                     menu_creator.text(1, 0, "FINISH!", Color::GREEN);
+                    menu_creator.text(
+                        1,
+                        1,
+                        &format!("Finished in {}", player_status.format_time()),
+                        Color::BLACK,
+                    );
                 }
             }
         }

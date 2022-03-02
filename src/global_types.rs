@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
@@ -30,6 +32,24 @@ impl GameBoundaries {
         (self.right + self.left) * 0.5
     }
 }
+
+#[derive(Default)]
+pub struct PlayerStatus {
+    pub distance_traveled: f32,
+    pub time: Duration,
+}
+
+impl PlayerStatus {
+    pub fn format_time(&self) -> String {
+        let time_in_seconds = self.time.as_secs_f32();
+        let only_minutes = time_in_seconds as u32 / 60;
+        let only_seconds = time_in_seconds % 60.0;
+        format!("{:02}:{:02.1}", only_minutes, only_seconds)
+    }
+}
+
+#[derive(SystemLabel, PartialEq, Eq, Debug, Hash, Clone)]
+pub struct SpawnMenuSystemLabel;
 
 #[derive(Component)]
 pub struct DespawnWithLevel;

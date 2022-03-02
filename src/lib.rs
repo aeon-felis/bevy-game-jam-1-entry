@@ -15,7 +15,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
 use self::consts::TRACK_LENGTH;
-use self::global_types::{AppState, GameBoundaries, GameOver};
+use self::global_types::{AppState, GameBoundaries, GameOver, PlayerStatus};
 
 pub struct GamePlugin;
 
@@ -27,6 +27,7 @@ impl Plugin for GamePlugin {
             left: -10.0,
             right: TRACK_LENGTH,
         });
+        app.init_resource::<PlayerStatus>();
         app.add_plugin(LoadingPlugin);
         app.add_plugin(InternalAudioPlugin);
         app.add_plugin(ui::UiPlugin);

@@ -6,7 +6,7 @@ mod pogo;
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;
 
-use crate::global_types::{AppState, DespawnWithLevel, GameOver};
+use crate::global_types::{AppState, DespawnWithLevel, GameOver, PlayerStatus};
 
 pub struct GameSystemsPlugin;
 
@@ -22,10 +22,8 @@ impl Plugin for GameSystemsPlugin {
         app.add_system_set({
             SystemSet::on_enter(AppState::ClearLevelAndThenLoad)
                 .with_system(clear_level)
+                .with_system(reset_resources)
                 .with_system(create_move_to_state_system(AppState::LoadLevel))
-                .with_system(|mut game_over_state: ResMut<State<Option<GameOver>>>| {
-                    let _ = game_over_state.set(None);
-                })
         });
         app.add_system_set(
             SystemSet::on_enter(AppState::LoadLevel)
@@ -54,6 +52,14 @@ fn clear_level(mut commands: Commands, query: Query<Entity, With<DespawnWithLeve
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
+}
+
+fn reset_resources(
+    mut game_over_state: ResMut<State<Option<GameOver>>>,
+    mut player_status: ResMut<PlayerStatus>,
+) {
+    let _ = game_over_state.set(None);
+    *player_status = PlayerStatus::default();
 }
 
 fn enable_disable_physics(

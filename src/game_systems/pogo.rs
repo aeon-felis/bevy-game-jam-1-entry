@@ -4,7 +4,10 @@ use ezinput::prelude::{
     ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
 };
 
-use crate::global_types::{AppState, CameraFollowTarget, DespawnWithLevel, Player, PlayerHead, GameBoundaries, GameOver};
+use crate::global_types::{
+    AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
+    PlayerStatus, SpawnMenuSystemLabel,
+};
 use crate::ui::MenuType;
 
 pub struct PogoPlugin;
@@ -17,7 +20,8 @@ impl Plugin for PogoPlugin {
             SystemSet::on_update(AppState::Game)
                 .with_system(player_controls)
                 .with_system(automatically_balance_player)
-                .with_system(detect_out_of_bounds)
+                .with_system(detect_out_of_bounds.before(SpawnMenuSystemLabel))
+                .with_system(update_player_status)
         });
     }
 }
@@ -38,6 +42,11 @@ fn spawn_player(mut commands: Commands) {
             local_com: point![0.0, 1.0],
             inv_mass: 1.0,
             inv_principal_inertia_sqrt: 1.0,
+        }
+        .into(),
+        damping: RigidBodyDamping {
+            linear_damping: 0.0,
+            angular_damping: 1.0,
         }
         .into(),
         ..Default::default()
@@ -118,7 +127,7 @@ fn player_controls(
         &RigidBodyMassPropsComponent,
     )>,
 ) {
-    let torque = time.delta().as_secs_f32() * 10.0;
+    let torque = time.delta().as_secs_f32() * 20.0;
     for (input_view, mut velocity, mass_props) in query.iter_mut() {
         if let Some(AxisState(spin_axis_value, PressState::Pressed { .. })) =
             input_view.axis(&ControlBinding::Spin).first()
@@ -164,4 +173,17 @@ fn detect_out_of_bounds(
             menu_writer.send(MenuType::GameOver(GameOver::FinishLine));
         }
     }
+}
+
+fn update_player_status(
+    time: Res<Time>,
+    player_query: Query<&RigidBodyPositionComponent, With<PlayerHead>>,
+    mut player_status: ResMut<PlayerStatus>,
+) {
+    for player_position in player_query.iter() {
+        // TODO: Once I add the sprite I should be able to just use the GlobalTransform
+        let player_position = player_position.position.translation.x;
+        player_status.distance_traveled = player_position;
+    }
+    player_status.time += time.delta();
 }
