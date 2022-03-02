@@ -23,13 +23,25 @@ fn add_ground(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
     });
     cmd.insert_bundle(ColliderBundle {
         shape: ColliderShape::cuboid(game_boundaries.width() * 0.5, 1.0).into(),
-        position: Vec2::new(game_boundaries.center(), -0.5).into(),
+        position: Vec2::new(game_boundaries.center(), -1.0).into(),
         ..Default::default()
     });
-    cmd.insert(ColliderDebugRender::with_id(1));
     cmd.insert(ColliderPositionSync::Discrete);
     cmd.insert(DespawnWithLevel);
     cmd.insert(Ground);
+
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite {
+            color: Color::rgb(158.0, 113.0, 124.0),
+            custom_size: Some(Vec2::new(game_boundaries.width(), 2.0)),
+            ..Default::default()
+        },
+        transform: Transform {
+            translation: Vec3::new(game_boundaries.center(), 0.0, -0.1),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 
     let every = 1.0;
     let how_many = (game_boundaries.width() / every) as u32;
@@ -41,7 +53,7 @@ fn add_ground(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
                 ..Default::default()
             },
             transform: Transform {
-                translation: Vec3::new(game_boundaries.left + every * i as f32, -0.5, 0.5),
+                translation: Vec3::new(game_boundaries.left + every * i as f32, -0.05, 0.5),
                 ..Default::default()
             },
             ..Default::default()
