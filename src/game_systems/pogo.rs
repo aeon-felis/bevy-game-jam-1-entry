@@ -6,7 +6,7 @@ use ezinput::prelude::{
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
-    PlayerStatus,
+    PlayerStatus, PlayerSprite,
 };
 use crate::loading::TextureAssets;
 use crate::ui::MenuType;
@@ -90,6 +90,7 @@ fn spawn_player(mut commands: Commands, texture_assets: Res<TextureAssets>) {
     player_cmd.insert(view);
     player_cmd.insert(ezinput::prelude::EZInputKeyboardService::default());
     player_cmd.insert(ezinput::prelude::EZInputGamepadService::default());
+    player_cmd.insert(PlayerSprite);
 
     let player_entity = player_cmd.id();
 
@@ -172,13 +173,12 @@ fn automatically_balance_player(
 }
 
 fn detect_out_of_bounds(
-    player_query: Query<&RigidBodyPositionComponent, With<PlayerHead>>,
+    player_query: Query<&GlobalTransform, With<PlayerSprite>>,
     mut menu_writer: EventWriter<MenuType>,
     game_boundaries: Res<GameBoundaries>,
 ) {
     for player_position in player_query.iter() {
-        // TODO: Once I add the sprite I should be able to just use the GlobalTransform
-        let player_position = player_position.position.translation.x;
+        let player_position = player_position.translation.x;
         if player_position < game_boundaries.left {
             menu_writer.send(MenuType::GameOver(GameOver::WrongWay));
         } else if game_boundaries.right < player_position {
@@ -189,13 +189,11 @@ fn detect_out_of_bounds(
 
 fn update_player_status(
     time: Res<Time>,
-    player_query: Query<&RigidBodyPositionComponent, With<PlayerHead>>,
+    player_query: Query<&GlobalTransform, With<PlayerSprite>>,
     mut player_status: ResMut<PlayerStatus>,
 ) {
     for player_position in player_query.iter() {
-        // TODO: Once I add the sprite I should be able to just use the GlobalTransform
-        let player_position = player_position.position.translation.x;
-        player_status.distance_traveled = player_position;
+        player_status.distance_traveled = player_position.translation.x;
     }
     player_status.time += time.delta();
 }

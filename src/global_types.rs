@@ -55,6 +55,9 @@ pub struct DespawnWithLevel;
 pub struct CameraFollowTarget;
 
 #[derive(Component)]
+pub struct PlayerSprite;
+
+#[derive(Component)]
 pub struct Player;
 
 #[derive(Component)]

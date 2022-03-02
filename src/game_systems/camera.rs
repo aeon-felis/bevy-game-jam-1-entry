@@ -18,6 +18,7 @@ fn setup_camera(mut commands: Commands) {
     camera.transform.scale.x *= 0.02;
     camera.transform.scale.y *= 0.02;
     camera.transform.translation.y = 2.0;
+    camera.transform.translation.z = 10.0;
     commands.spawn_bundle(camera).insert(CameraBehavior {
         target: 0.0,
         velocity: 0.0,
@@ -43,15 +44,13 @@ struct CameraBehavior {
 fn set_camera_target(
     mut camera_query: Query<&mut CameraBehavior>,
     target_query: Query<
-        &bevy_rapier2d::prelude::RigidBodyPositionComponent,
+        &GlobalTransform,
         With<CameraFollowTarget>,
     >,
 ) {
     for mut camera in camera_query.iter_mut() {
         for target in target_query.iter() {
-            // TODO: Once I add the sprite I should be able to just use the GlobalTransform
-            let target = target.position.translation;
-            camera.target = target.x;
+            camera.target = target.translation.x;
         }
     }
 }
