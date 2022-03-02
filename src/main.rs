@@ -4,7 +4,6 @@
 use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
 use bevy::DefaultPlugins;
 use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
-use bevy_rapier2d::render::RapierRenderPlugin;
 use bevy_ui_navigation::NavigationPlugin;
 use pogo_hurdling::GamePlugin;
 
@@ -26,6 +25,5 @@ fn main() {
     app.add_plugin(GamePlugin);
     app.add_plugin(NavigationPlugin);
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
-    app.add_plugin(RapierRenderPlugin);
     app.run();
 }

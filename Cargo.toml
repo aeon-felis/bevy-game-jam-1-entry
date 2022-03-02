@@ -27,7 +27,6 @@ default = [
 
 dev = [
     "bevy/dynamic",
-    "bevy_rapier2d/render",
 ]
 
 [dependencies]
