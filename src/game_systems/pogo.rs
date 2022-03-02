@@ -6,7 +6,7 @@ use ezinput::prelude::{
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
-    PlayerStatus, PlayerSprite,
+    PlayerSprite, PlayerStatus,
 };
 use crate::loading::TextureAssets;
 use crate::ui::MenuType;

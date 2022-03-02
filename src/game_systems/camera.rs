@@ -43,10 +43,7 @@ struct CameraBehavior {
 
 fn set_camera_target(
     mut camera_query: Query<&mut CameraBehavior>,
-    target_query: Query<
-        &GlobalTransform,
-        With<CameraFollowTarget>,
-    >,
+    target_query: Query<&GlobalTransform, With<CameraFollowTarget>>,
 ) {
     for mut camera in camera_query.iter_mut() {
         for target in target_query.iter() {

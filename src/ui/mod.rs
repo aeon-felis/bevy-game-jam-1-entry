@@ -133,18 +133,25 @@ fn spawn_menu(
             menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
 
             match game_over_reason {
-                GameOver::Injured | GameOver::Disqualified => {
-                    let caption = match game_over_reason {
-                        GameOver::Disqualified => "DISQUALIFIED!",
-                        GameOver::Injured => "INJURED!",
-                        _ => panic!(),
-                    };
-                    menu_creator.text(1, 0, caption, Color::RED);
+                GameOver::Injured => {
+                    menu_creator.text(1, 0, "INJURED!", Color::RED);
                     menu_creator.text(
                         1,
                         1,
                         &format!(
-                            "Traveled {:.1}m before failing",
+                            "Traveled {:.1}m before hitting your head",
+                            player_status.distance_traveled
+                        ),
+                        Color::BLACK,
+                    );
+                }
+                GameOver::Disqualified => {
+                    menu_creator.text(1, 0, "DISQUALIFIED!", Color::RED);
+                    menu_creator.text(
+                        1,
+                        1,
+                        &format!(
+                            "Traveled {:.1}m before hitting a hurdle",
                             player_status.distance_traveled
                         ),
                         Color::BLACK,
