@@ -5,13 +5,13 @@ use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
 use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
-use crate::global_types::{AppState, GameOver, PlayerStatus, SpawnMenuSystemLabel};
+use crate::global_types::{AppState, GameOver, PlayerStatus};
 use crate::loading::FontAssets;
 use crate::ui::score::ScorePlugin;
 
 pub struct UiPlugin;
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone, Debug, PartialEq)]
 pub enum MenuType {
     Main,
     Pause,
@@ -40,7 +40,7 @@ impl Plugin for UiPlugin {
 
         app.add_plugin(ScorePlugin);
 
-        app.add_system(spawn_menu.label(SpawnMenuSystemLabel));
+        app.add_system(spawn_menu);
         app.add_startup_system(|mut writer: EventWriter<MenuType>| {
             writer.send(MenuType::Main);
         });
@@ -85,7 +85,7 @@ fn spawn_menu(
     font_assets: Res<FontAssets>,
     mut state: ResMut<State<AppState>>,
     mut game_over_state: ResMut<State<Option<GameOver>>>,
-    existing_menu_items_query: Query<Entity, With<MenuType>>,
+    existing_menu_items_query: Query<(Entity, &MenuType)>,
     player_status: Res<PlayerStatus>,
 ) {
     let menu_type = if let Some(menu_type) = reader.iter().last() {
@@ -93,8 +93,16 @@ fn spawn_menu(
     } else {
         return;
     };
-    for entity in existing_menu_items_query.iter() {
+    let mut menu_already_exists = false;
+    for (entity, existing_menu_type) in existing_menu_items_query.iter() {
+        if existing_menu_type == menu_type {
+            menu_already_exists = true;
+            continue;
+        }
         commands.entity(entity).despawn_recursive();
+    }
+    if menu_already_exists {
+        return;
     }
     let mut menu_creator = MenuCreator {
         commands: &mut commands,

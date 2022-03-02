@@ -48,9 +48,6 @@ impl PlayerStatus {
     }
 }
 
-#[derive(SystemLabel, PartialEq, Eq, Debug, Hash, Clone)]
-pub struct SpawnMenuSystemLabel;
-
 #[derive(Component)]
 pub struct DespawnWithLevel;
 

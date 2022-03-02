@@ -6,7 +6,7 @@ use ezinput::prelude::{
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
-    PlayerStatus, SpawnMenuSystemLabel,
+    PlayerStatus,
 };
 use crate::ui::MenuType;
 
@@ -20,7 +20,7 @@ impl Plugin for PogoPlugin {
             SystemSet::on_update(AppState::Game)
                 .with_system(player_controls)
                 .with_system(automatically_balance_player)
-                .with_system(detect_out_of_bounds.before(SpawnMenuSystemLabel))
+                .with_system(detect_out_of_bounds)
                 .with_system(update_player_status)
         });
     }
@@ -156,14 +156,10 @@ fn automatically_balance_player(
 }
 
 fn detect_out_of_bounds(
-    game_over_state: Res<State<Option<GameOver>>>,
     player_query: Query<&RigidBodyPositionComponent, With<PlayerHead>>,
     mut menu_writer: EventWriter<MenuType>,
     game_boundaries: Res<GameBoundaries>,
 ) {
-    if game_over_state.current().is_some() {
-        return;
-    }
     for player_position in player_query.iter() {
         // TODO: Once I add the sprite I should be able to just use the GlobalTransform
         let player_position = player_position.position.translation.x;
