@@ -123,7 +123,7 @@ fn player_controls(
     if keyboard_input.pressed(KeyCode::Right) {
         spin_value -= 1.0;
     }
-    let torque = time.delta().as_secs_f32() * 20.0 * spin_value;
+    let torque = time.delta().as_secs_f32() * 30.0 * spin_value;
     for (mut velocity, mass_props) in query.iter_mut() {
         velocity.apply_torque_impulse(mass_props, torque);
     }
@@ -140,10 +140,12 @@ fn automatically_balance_player(
         With<AutoBalance>,
     >,
 ) {
-    let torque = time.delta().as_secs_f32() * 2.0;
+    let torque = time.delta().as_secs_f32() * 20.0;
     for (position, mut velocity, mass_props) in query.iter_mut() {
         let angle = position.0.position.rotation.angle();
-        velocity.apply_torque_impulse(mass_props, torque * -angle);
+        if 0.2 <= angle.abs() {
+            velocity.apply_torque_impulse(mass_props, torque * -angle.clamp(-1.0, 1.0));
+        }
     }
 }
 
