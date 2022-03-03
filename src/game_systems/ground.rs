@@ -32,7 +32,7 @@ fn add_ground(mut commands: Commands, game_boundaries: Res<GameBoundaries>) {
 
     commands.spawn_bundle(SpriteBundle {
         sprite: Sprite {
-            color: Color::rgb(158.0, 113.0, 124.0),
+            color: Color::rgb_u8(185, 113, 124),
             custom_size: Some(Vec2::new(game_boundaries.width(), 2.0)),
             ..Default::default()
         },
