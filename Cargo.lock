@@ -201,6 +201,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47611e530cf21bb89fbfe322aa8b1feae1ace33ff65f8ebf40fe3b4b99b7c9a2"
 
 [[package]]
+name = "benimator"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30848ad4e02a759b648e439889d2b2e274a3907a4a668adc7ef6ca24e4dfec2c"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_core",
+ "bevy_ecs",
+ "bevy_reflect",
+ "bevy_sprite",
+]
+
+[[package]]
 name = "bevy"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2682,6 +2696,7 @@ dependencies = [
 name = "pogo_hurdling"
 version = "0.1.0"
 dependencies = [
+ "benimator",
  "bevy",
  "bevy-ui-navigation",
  "bevy_asset_loader",

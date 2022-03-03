@@ -25,5 +25,6 @@ fn main() {
     app.add_plugin(GamePlugin);
     app.add_plugin(NavigationPlugin);
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
+    app.add_plugin(benimator::AnimationPlugin::default());
     app.run();
 }

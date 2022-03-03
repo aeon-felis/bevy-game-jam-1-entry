@@ -2,6 +2,7 @@ mod camera;
 mod ground;
 mod hurdles;
 mod pogo;
+mod competitors;
 
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;
@@ -32,6 +33,7 @@ impl Plugin for GameSystemsPlugin {
         app.add_plugin(ground::GroundPlugin);
         app.add_plugin(pogo::PogoPlugin);
         app.add_plugin(hurdles::HurdlesPlugin);
+        app.add_plugin(competitors::CompetitorsPlugin);
         app.add_system(enable_disable_physics.with_run_criteria(run_on_state_change));
     }
 }
