@@ -137,9 +137,6 @@ jobs:
           override: true
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev
-      - name: Upgrade wasm toolchain
-        run: |
-          cargo install -f wasm-bindgen-cli --version 0.2.79
       - name: Install cargo-make
         run: |
           cargo install cargo-make
