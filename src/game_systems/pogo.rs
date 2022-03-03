@@ -1,8 +1,5 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use ezinput::prelude::{
-    ActionBinding, AxisState, BindingInputReceiver, BindingTypeView, InputView, PressState,
-};
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
@@ -16,7 +13,6 @@ pub struct PogoPlugin;
 impl Plugin for PogoPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(AppState::LoadLevel).with_system(spawn_player));
-        app.add_plugin(ezinput::prelude::EZInputPlugin::<ControlBinding>::default());
         app.add_system_set({
             SystemSet::on_update(AppState::Game)
                 .with_system(player_controls)
@@ -25,11 +21,6 @@ impl Plugin for PogoPlugin {
                 .with_system(update_player_status)
         });
     }
-}
-
-#[derive(ezinput_macros::BindingTypeView, PartialEq, Eq, Hash, Clone, Copy, Debug)]
-enum ControlBinding {
-    Spin,
 }
 
 #[derive(Component)]
@@ -68,28 +59,6 @@ fn spawn_player(mut commands: Commands, texture_assets: Res<TextureAssets>) {
     player_cmd.insert(AutoBalance);
     player_cmd.insert(RigidBodyPositionSync::Discrete);
     player_cmd.insert(CameraFollowTarget);
-
-    let mut view = InputView::empty();
-    view.add_binding(ControlBinding::Spin, &{
-        let mut binding = ActionBinding::from(ControlBinding::Spin);
-
-        for (binding_input_receiver, axis_value) in [
-            (BindingInputReceiver::KeyboardKey(KeyCode::Left), -1.0),
-            (BindingInputReceiver::KeyboardKey(KeyCode::Right), 1.0),
-        ] {
-            binding.receiver(binding_input_receiver);
-            binding.default_axis_value(binding_input_receiver, axis_value);
-        }
-
-        binding.receiver(BindingInputReceiver::GamepadAxis(
-            GamepadAxisType::LeftStickX,
-        ));
-
-        binding
-    });
-    player_cmd.insert(view);
-    player_cmd.insert(ezinput::prelude::EZInputKeyboardService::default());
-    player_cmd.insert(ezinput::prelude::EZInputGamepadService::default());
     player_cmd.insert(PlayerSprite);
 
     let player_entity = player_cmd.id();
@@ -138,19 +107,25 @@ fn spawn_player(mut commands: Commands, texture_assets: Res<TextureAssets>) {
 
 fn player_controls(
     time: Res<Time>,
-    mut query: Query<(
-        &InputView<ControlBinding>,
-        &mut RigidBodyVelocityComponent,
-        &RigidBodyMassPropsComponent,
-    )>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<
+        (
+            &mut RigidBodyVelocityComponent,
+            &RigidBodyMassPropsComponent,
+        ),
+        With<PlayerSprite>,
+    >,
 ) {
-    let torque = time.delta().as_secs_f32() * 20.0;
-    for (input_view, mut velocity, mass_props) in query.iter_mut() {
-        if let Some(AxisState(spin_axis_value, PressState::Pressed { .. })) =
-            input_view.axis(&ControlBinding::Spin).first()
-        {
-            velocity.apply_torque_impulse(mass_props, torque * -*spin_axis_value);
-        }
+    let mut spin_value = 0.0;
+    if keyboard_input.pressed(KeyCode::Left) {
+        spin_value += 1.0;
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        spin_value -= 1.0;
+    }
+    let torque = time.delta().as_secs_f32() * 20.0 * spin_value;
+    for (mut velocity, mass_props) in query.iter_mut() {
+        velocity.apply_torque_impulse(mass_props, torque);
     }
 }
 

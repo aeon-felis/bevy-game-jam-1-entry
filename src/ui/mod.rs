@@ -3,7 +3,6 @@ mod score;
 use bevy::prelude::*;
 use bevy_ui_navigation::systems::InputMapping;
 use bevy_ui_navigation::{FocusState, Focusable, NavEvent, NavRequest};
-use ezinput::prelude::{ActionBinding, BindingInputReceiver, BindingTypeView, InputView};
 
 use crate::global_types::{AppState, GameOver, PlayerStatus};
 use crate::loading::FontAssets;
@@ -23,12 +22,8 @@ enum MenuAction {
     StartGame,
     ResumeGame,
     BackToMainMenu,
+    #[cfg_attr(target_arch = "wasm32", allow(unused))]
     ExitGame,
-}
-
-#[derive(ezinput_macros::BindingTypeView, PartialEq, Eq, Hash, Clone, Copy, Debug)]
-enum UiBinding {
-    Pause,
 }
 
 impl Plugin for UiPlugin {
@@ -57,26 +52,11 @@ impl Plugin for UiPlugin {
             SystemSet::on_exit(AppState::Menu).with_system(destroy_menu_on_stage_exit),
         );
         app.add_system(pause_unpause_game);
-        app.add_plugin(ezinput::prelude::EZInputPlugin::<UiBinding>::default());
     }
 }
 
 fn setup_ui(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
-    let mut view = InputView::empty();
-    view.add_binding(UiBinding::Pause, &{
-        let mut binding = ActionBinding::from(UiBinding::Pause);
-        binding.receiver(BindingInputReceiver::KeyboardKey(KeyCode::Escape));
-        binding.receiver(BindingInputReceiver::GamepadButton(
-            GamepadButtonType::Start,
-        ));
-        binding
-    });
-    commands
-        .spawn()
-        .insert(view)
-        .insert(ezinput::prelude::EZInputKeyboardService::default())
-        .insert(ezinput::prelude::EZInputGamepadService::default());
 }
 
 fn spawn_menu(
@@ -117,11 +97,13 @@ fn spawn_menu(
     match menu_type {
         MenuType::Main => {
             menu_creator.button(0, 0, "Start", MenuAction::StartGame);
+            #[cfg(not(target_arch = "wasm32"))]
             menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
         }
         MenuType::Pause => {
             menu_creator.button(0, 0, "Resume", MenuAction::ResumeGame);
             menu_creator.button(0, 1, "Main Menu", MenuAction::BackToMainMenu);
+            #[cfg(not(target_arch = "wasm32"))]
             menu_creator.button(0, 2, "Exit", MenuAction::ExitGame);
         }
         MenuType::GameOver(game_over_reason) => {
@@ -130,6 +112,7 @@ fn spawn_menu(
             }
             game_over_state.set(Some(game_over_reason.clone())).unwrap();
             menu_creator.button(0, 0, "Main Menu", MenuAction::BackToMainMenu);
+            #[cfg(not(target_arch = "wasm32"))]
             menu_creator.button(0, 1, "Exit", MenuAction::ExitGame);
 
             match game_over_reason {
@@ -358,16 +341,15 @@ fn destroy_menu_on_stage_exit(
 }
 
 fn pause_unpause_game(
-    input_query: Query<&InputView<UiBinding>>,
+    mut keyboard_input: ResMut<Input<KeyCode>>,
     state: Res<State<AppState>>,
     mut menu_writer: EventWriter<MenuType>,
     mut action_writer: EventWriter<MenuAction>,
     menu_type_query: Query<&MenuType>,
 ) {
-    if !input_query
-        .iter()
-        .any(|input_view| input_view.key(&UiBinding::Pause).just_pressed())
-    {
+    if keyboard_input.pressed(KeyCode::Escape) {
+        keyboard_input.reset(KeyCode::Escape);
+    } else {
         return;
     }
     match state.current() {
