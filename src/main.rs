@@ -14,7 +14,7 @@ fn main() {
     app.insert_resource(WindowDescriptor {
         width: 800.,
         height: 600.,
-        title: "Idan Arye".to_string(),
+        title: "Pogo Hurdling".to_string(),
         ..Default::default()
     });
     app.add_plugins_with(DefaultPlugins, |group| {
