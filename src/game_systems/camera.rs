@@ -8,6 +8,7 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_camera);
         app.add_system_set(SystemSet::on_enter(AppState::LoadLevel).with_system(reset_camera));
+        app.add_system(update_camera_scale_to_window);
         app.add_system(set_camera_target);
         app.add_system(handle_camera_movement);
     }
@@ -15,14 +16,23 @@ impl Plugin for CameraPlugin {
 
 fn setup_camera(mut commands: Commands) {
     let mut camera = OrthographicCameraBundle::new_2d();
-    camera.transform.scale.x *= 0.02;
-    camera.transform.scale.y *= 0.02;
     camera.transform.translation.y = 2.0;
     camera.transform.translation.z = 10.0;
     commands.spawn_bundle(camera).insert(CameraBehavior {
         target: 0.0,
         velocity: 0.0,
     });
+}
+
+fn update_camera_scale_to_window(
+    mut query: Query<(&Camera, &mut OrthographicProjection), With<CameraBehavior>>,
+    windows: Res<Windows>,
+) {
+    for (camera, mut projection) in query.iter_mut() {
+        if let Some(window) = windows.get(camera.window) {
+            projection.scale = 15.0 / window.width();
+        }
+    }
 }
 
 fn reset_camera(mut query: Query<(&mut CameraBehavior, &mut Transform)>) {

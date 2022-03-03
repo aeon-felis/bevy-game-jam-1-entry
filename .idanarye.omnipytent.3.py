@@ -32,3 +32,12 @@ def test(ctx):
 @task
 def clean(ctx):
     cargo['clean'] & BANG
+
+
+@task
+def launch_wasm(ctx):
+    cargo['run'][
+        '--target', 'wasm32-unknown-unknown'
+    ].with_env(
+        RUST_BACKTRACE='1',
+    ) & TERMINAL_PANEL.size(20)
