@@ -18,7 +18,7 @@ struct ScoreDisplayText;
 fn setup_score_display(mut commands: Commands, font_assets: Res<FontAssets>) {
     let mut cmd = commands.spawn_bundle(NodeBundle {
         style: Style {
-            size: Size::new(Val::Px(0.0), Val::Px(50.0)),
+            size: Size::new(Val::Px(0.0), Val::Px(90.0)),
             position_type: PositionType::Absolute,
             justify_content: JustifyContent::FlexStart,
             position: Rect {
@@ -61,6 +61,26 @@ fn setup_score_display(mut commands: Commands, font_assets: Res<FontAssets>) {
                         value: String::new(),
                         style: text_style.clone(),
                     },
+                    TextSection {
+                        value: "\n".to_owned(),
+                        style: text_style.clone(),
+                    },
+                    TextSection {
+                        value: "Place: ".to_owned(),
+                        style: text_style.clone(),
+                    },
+                    TextSection {
+                        value: String::new(),
+                        style: text_style.clone(),
+                    },
+                    TextSection {
+                        value: " out of ".to_owned(),
+                        style: text_style.clone(),
+                    },
+                    TextSection {
+                        value: String::new(),
+                        style: text_style.clone(),
+                    },
                 ],
                 alignment: TextAlignment {
                     vertical: VerticalAlign::Bottom,
@@ -80,5 +100,7 @@ fn update_score_display(
     for mut score_text in query.iter_mut() {
         score_text.sections[1].value = format!("{:.1}m", player_status.distance_traveled);
         score_text.sections[4].value = player_status.format_time();
+        score_text.sections[7].value = player_status.place().to_string();
+        score_text.sections[9].value = player_status.total_runners().to_string();
     }
 }

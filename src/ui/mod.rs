@@ -148,7 +148,12 @@ fn spawn_menu(
                     menu_creator.text(
                         1,
                         1,
-                        &format!("Finished in {}", player_status.format_time()),
+                        &format!(
+                            "Finished in {}, place {} out of {}",
+                            player_status.format_time(),
+                            player_status.place(),
+                            player_status.total_runners()
+                        ),
                         Color::BLACK,
                     );
                 }

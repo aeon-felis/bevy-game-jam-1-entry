@@ -1,8 +1,8 @@
 mod camera;
+mod competitors;
 mod ground;
 mod hurdles;
 mod pogo;
-mod competitors;
 
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;

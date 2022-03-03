@@ -37,6 +37,8 @@ impl GameBoundaries {
 pub struct PlayerStatus {
     pub distance_traveled: f32,
     pub time: Duration,
+    pub competitors_before: usize,
+    pub competitors_after: usize,
 }
 
 impl PlayerStatus {
@@ -45,6 +47,14 @@ impl PlayerStatus {
         let only_minutes = time_in_seconds as u32 / 60;
         let only_seconds = time_in_seconds % 60.0;
         format!("{:02}:{:02.1}", only_minutes, only_seconds)
+    }
+
+    pub fn place(&self) -> usize {
+        self.competitors_before + 1
+    }
+
+    pub fn total_runners(&self) -> usize {
+        self.competitors_before + self.competitors_after + 1
     }
 }
 
@@ -65,6 +75,9 @@ pub struct PlayerHead;
 
 #[derive(Component)]
 pub struct Hurdle;
+
+#[derive(Component)]
+pub struct Competitor;
 
 #[derive(Component)]
 pub struct Ground;

@@ -47,12 +47,14 @@ fn init_animations(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
 ) {
-
     animation_assets.competitor_atlas = texture_atlases.add(TextureAtlas::from_grid(
-            texture_assets.competitor.clone(),
-            Vec2::new(64.0, 64.0),
-            4,
-            1,
+        texture_assets.competitor.clone(),
+        Vec2::new(64.0, 64.0),
+        4,
+        1,
     ));
-    animation_assets.competitor = animations.add(SpriteSheetAnimation::from_range(0..=3, Duration::from_millis(200)));
+    animation_assets.competitor = animations.add(SpriteSheetAnimation::from_range(
+        0..=3,
+        Duration::from_millis(200),
+    ));
 }
