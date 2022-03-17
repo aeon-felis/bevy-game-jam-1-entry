@@ -16,11 +16,7 @@ fn main() {
         title: "Pogo Hurdling".to_string(),
         ..Default::default()
     });
-    app.add_plugins_with(DefaultPlugins, |group| {
-        #[cfg(not(debug_assertions))]
-        group.add_before::<bevy::asset::AssetPlugin, _>(bevy_embedded_assets::EmbeddedAssetPlugin);
-        group
-    });
+    app.add_plugins(DefaultPlugins);
     app.add_plugin(GamePlugin);
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
     app.add_plugin(benimator::AnimationPlugin::default());
