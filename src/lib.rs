@@ -15,13 +15,13 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
 use self::consts::TRACK_LENGTH;
-use self::global_types::{AppState, GameBoundaries, GameOver, PlayerStatus};
+use self::global_types::{AppState, GameBoundaries, GameOver, PlayerStatus, MenuState};
 
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(AppState::Menu);
+        app.add_state(AppState::Menu(MenuState::Main));
         app.add_state::<Option<GameOver>>(None);
         app.insert_resource(GameBoundaries {
             left: -10.0,

@@ -6,9 +6,8 @@ use rand::prelude::SliceRandom;
 use rand::Rng;
 
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
-use crate::global_types::{AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, Player};
+use crate::global_types::{AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, Player, MenuState};
 use crate::loading::TextureAssets;
-use crate::ui::MenuType;
 use crate::utils::entities_ordered_by_type;
 
 pub struct HurdlesPlugin;
@@ -98,7 +97,8 @@ fn detect_hurdle_touch(
     mut reader: EventReader<ContactEvent>,
     hurdle_query: Query<(), With<Hurdle>>,
     player_query: Query<(), With<Player>>,
-    mut menu_writer: EventWriter<MenuType>,
+    mut state: ResMut<State<AppState>>,
+    mut game_over_state: ResMut<State<Option<GameOver>>>,
 ) {
     for event in reader.iter() {
         if let ContactEvent::Started(handle1, handle2) = event {
@@ -109,7 +109,8 @@ fn detect_hurdle_touch(
             )
             .is_some()
             {
-                menu_writer.send(MenuType::GameOver(GameOver::Disqualified));
+                state.set(AppState::Menu(MenuState::GameOver)).unwrap();
+                game_over_state.set(Some(GameOver::Disqualified)).unwrap();
             }
         }
     }

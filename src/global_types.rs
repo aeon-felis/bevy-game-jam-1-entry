@@ -4,10 +4,17 @@ use bevy::prelude::*;
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
 pub enum AppState {
-    Menu,
+    Menu(MenuState),
     ClearLevelAndThenLoad,
     LoadLevel,
     Game,
+}
+
+#[derive(Hash, Debug, PartialEq, Eq, Clone)]
+pub enum MenuState {
+    Main,
+    Pause,
+    GameOver,
 }
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]

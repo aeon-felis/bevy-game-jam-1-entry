@@ -7,7 +7,7 @@ mod pogo;
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;
 
-use crate::global_types::{AppState, DespawnWithLevel, GameOver, PlayerStatus};
+use crate::global_types::{AppState, DespawnWithLevel, GameOver, PlayerStatus, MenuState};
 
 pub struct GameSystemsPlugin;
 
@@ -67,13 +67,11 @@ fn reset_resources(
 fn enable_disable_physics(
     state: Res<State<AppState>>,
     mut rapier_configuration: ResMut<bevy_rapier2d::physics::RapierConfiguration>,
-    game_over_state: Res<State<Option<GameOver>>>,
 ) {
     let set_to = match state.current() {
-        AppState::Menu | AppState::ClearLevelAndThenLoad | AppState::LoadLevel => {
-            game_over_state.current().is_some()
-        }
         AppState::Game => true,
+        AppState::Menu(MenuState::GameOver) => true,
+        AppState::Menu(_) | AppState::ClearLevelAndThenLoad | AppState::LoadLevel => false,
     };
     rapier_configuration.physics_pipeline_active = set_to;
     rapier_configuration.query_pipeline_active = set_to;

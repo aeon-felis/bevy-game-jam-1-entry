@@ -3,10 +3,9 @@ use bevy_rapier2d::prelude::*;
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
-    PlayerSprite, PlayerStatus,
+    PlayerSprite, PlayerStatus, MenuState,
 };
 use crate::loading::TextureAssets;
-use crate::ui::MenuType;
 
 pub struct PogoPlugin;
 
@@ -151,15 +150,18 @@ fn automatically_balance_player(
 
 fn detect_out_of_bounds(
     player_query: Query<&GlobalTransform, With<PlayerSprite>>,
-    mut menu_writer: EventWriter<MenuType>,
     game_boundaries: Res<GameBoundaries>,
+    mut state: ResMut<State<AppState>>,
+    mut game_over_state: ResMut<State<Option<GameOver>>>,
 ) {
     for player_position in player_query.iter() {
         let player_position = player_position.translation.x;
         if player_position < game_boundaries.left {
-            menu_writer.send(MenuType::GameOver(GameOver::WrongWay));
+            state.set(AppState::Menu(MenuState::GameOver)).unwrap();
+            game_over_state.set(Some(GameOver::WrongWay)).unwrap();
         } else if game_boundaries.right < player_position {
-            menu_writer.send(MenuType::GameOver(GameOver::FinishLine));
+            state.set(AppState::Menu(MenuState::GameOver)).unwrap();
+            game_over_state.set(Some(GameOver::FinishLine)).unwrap();
         }
     }
 }

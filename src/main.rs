@@ -4,7 +4,6 @@
 use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
 use bevy::DefaultPlugins;
 use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
-use bevy_ui_navigation::NavigationPlugin;
 use pogo_hurdling::GamePlugin;
 
 fn main() {
@@ -23,8 +22,10 @@ fn main() {
         group
     });
     app.add_plugin(GamePlugin);
-    app.add_plugin(NavigationPlugin);
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
     app.add_plugin(benimator::AnimationPlugin::default());
+    app.add_plugin(bevy_egui_kbgp::bevy_egui::EguiPlugin);
+    app.insert_resource(bevy_egui_kbgp::bevy_egui::EguiSettings { scale_factor: 2.0 });
+    app.add_system(bevy_egui_kbgp::kbgp_system_default_input);
     app.run();
 }

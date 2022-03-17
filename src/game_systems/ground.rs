@@ -2,9 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::global_types::{
-    AppState, DespawnWithLevel, GameBoundaries, GameOver, Ground, PlayerHead,
+    AppState, DespawnWithLevel, GameBoundaries, GameOver, Ground, PlayerHead, MenuState,
 };
-use crate::ui::MenuType;
 use crate::utils::entities_ordered_by_type;
 
 pub struct GroundPlugin;
@@ -65,7 +64,8 @@ fn detect_ground_touch(
     mut reader: EventReader<ContactEvent>,
     ground_query: Query<(), With<Ground>>,
     player_head_query: Query<(), With<PlayerHead>>,
-    mut menu_writer: EventWriter<MenuType>,
+    mut state: ResMut<State<AppState>>,
+    mut game_over_state: ResMut<State<Option<GameOver>>>,
 ) {
     for event in reader.iter() {
         if let ContactEvent::Started(handle1, handle2) = event {
@@ -76,7 +76,8 @@ fn detect_ground_touch(
             )
             .is_some()
             {
-                menu_writer.send(MenuType::GameOver(GameOver::Injured));
+                state.set(AppState::Menu(MenuState::GameOver)).unwrap();
+                game_over_state.set(Some(GameOver::Injured)).unwrap();
             } else {
             }
         }
