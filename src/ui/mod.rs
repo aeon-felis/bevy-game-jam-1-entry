@@ -13,26 +13,18 @@ use crate::ui::score::ScorePlugin;
 
 pub struct UiPlugin;
 
-#[derive(Component, Clone)]
-enum MenuAction {
-    StartGame,
-    ResumeGame,
-    BackToMainMenu,
-    #[cfg_attr(target_arch = "wasm32", allow(unused))]
-    ExitGame,
-}
-
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_ui);
-        app.add_event::<MenuAction>();
 
         app.add_plugin(ScorePlugin);
 
         app.add_system_set(SystemSet::on_update(AppState::Menu(MenuState::Main)).with_system(main_menu));
         app.add_system_set(SystemSet::on_update(AppState::Menu(MenuState::Pause)).with_system(pause_menu));
         app.add_system_set(SystemSet::on_update(AppState::Menu(MenuState::GameOver)).with_system(game_over_menu));
-        app.add_system(handle_menu_actions);
+        app.add_system_set(SystemSet::on_exit(AppState::Menu(MenuState::GameOver)).with_system(|mut game_over_state: ResMut<State<Option<GameOver>>>| {
+            game_over_state.set(None).unwrap();
+        }));
         app.add_system(pause_unpause_game);
     }
 }
@@ -41,33 +33,9 @@ fn setup_ui(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
 }
 
-fn handle_menu_actions(
-    mut reader: EventReader<MenuAction>,
-    mut state: ResMut<State<AppState>>,
-    mut exit: EventWriter<bevy::app::AppExit>,
-) {
-    for event in reader.iter() {
-        match event {
-            MenuAction::StartGame => {
-                state.set(AppState::ClearLevelAndThenLoad).unwrap();
-            }
-            MenuAction::ExitGame => {
-                exit.send(bevy::app::AppExit);
-            }
-            MenuAction::ResumeGame => {
-                state.set(AppState::Game).unwrap();
-            }
-            MenuAction::BackToMainMenu => {
-                state.set(AppState::Menu(MenuState::Main)).unwrap();
-            }
-        }
-    }
-}
-
 fn pause_unpause_game(
     mut keyboard_input: ResMut<Input<KeyCode>>,
     mut state: ResMut<State<AppState>>,
-    mut action_writer: EventWriter<MenuAction>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         keyboard_input.reset(KeyCode::Escape);
@@ -76,7 +44,7 @@ fn pause_unpause_game(
     }
     match state.current() {
         AppState::Menu(MenuState::Pause) => {
-            action_writer.send(MenuAction::ResumeGame);
+            state.set(AppState::Game).unwrap();
         }
         AppState::Menu(_) => {}
         AppState::ClearLevelAndThenLoad => {}
@@ -98,29 +66,34 @@ fn menu_layout(egui_context: &egui::Context, dlg: impl FnOnce(&mut egui::Ui)) {
 
 fn main_menu(
     mut egui_context: ResMut<EguiContext>,
-    mut action_writer: EventWriter<MenuAction>,
+    mut state: ResMut<State<AppState>>,
+    #[cfg(not(target_arch = "wasm32"))]
+    mut exit: EventWriter<bevy::app::AppExit>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
-        if ui.button("Start").kbgp_navigation().clicked() {
-            action_writer.send(MenuAction::StartGame);
+        if ui.button("Start").kbgp_navigation().kbgp_initial_focus().clicked() {
+            state.set(AppState::ClearLevelAndThenLoad).unwrap();
         }
         #[cfg(not(target_arch = "wasm32"))]
         if ui.button("Exit").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::ExitGame);
+            exit.send(bevy::app::AppExit);
         }
     });
 }
 
 fn pause_menu(
     mut egui_context: ResMut<EguiContext>,
-    mut action_writer: EventWriter<MenuAction>,
+    mut state: ResMut<State<AppState>>,
+    #[cfg(not(target_arch = "wasm32"))]
+    mut exit: EventWriter<bevy::app::AppExit>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
-        if ui.button("Resume").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::ResumeGame);
+        if ui.button("Resume").kbgp_navigation().kbgp_initial_focus().kbgp_activated() {
+            state.set(AppState::Game).unwrap();
         }
         if ui.button("Main Menu").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::BackToMainMenu);
+            state.set(AppState::Menu(MenuState::Main)).unwrap();
+            // Todo: remove this once I solve the bug where it keeps get pressed
             let focus = ui.memory().focus();
             if let Some(focus) = focus {
                 ui.memory().surrender_focus(focus);
@@ -128,20 +101,23 @@ fn pause_menu(
         }
         #[cfg(not(target_arch = "wasm32"))]
         if ui.button("Exit").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::ExitGame);
+            exit.send(bevy::app::AppExit);
         }
     });
 }
 
 fn game_over_menu(
     mut egui_context: ResMut<EguiContext>,
-    mut action_writer: EventWriter<MenuAction>,
+    mut state: ResMut<State<AppState>>,
+    #[cfg(not(target_arch = "wasm32"))]
+    mut exit: EventWriter<bevy::app::AppExit>,
     game_over_state: Res<State<Option<GameOver>>>,
     player_status: Res<PlayerStatus>,
 ) {
     menu_layout(egui_context.ctx_mut(), |ui| {
-        if ui.button("Main Menu").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::BackToMainMenu);
+        if ui.button("Main Menu").kbgp_navigation().kbgp_initial_focus().kbgp_activated() {
+            state.set(AppState::Menu(MenuState::Main)).unwrap();
+            // Todo: remove this once I solve the bug where it keeps get pressed
             let focus = ui.memory().focus();
             if let Some(focus) = focus {
                 ui.memory().surrender_focus(focus);
@@ -149,7 +125,7 @@ fn game_over_menu(
         }
         #[cfg(not(target_arch = "wasm32"))]
         if ui.button("Exit").kbgp_navigation().kbgp_activated() {
-            action_writer.send(MenuAction::ExitGame);
+            exit.send(bevy::app::AppExit);
         }
         if let Some(game_over) = game_over_state.current() {
             match game_over {
