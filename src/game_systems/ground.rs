@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::global_types::{
-    AppState, DespawnWithLevel, GameBoundaries, GameOver, Ground, PlayerHead, MenuState,
+    AppState, DespawnWithLevel, GameBoundaries, GameOver, Ground, MenuState, PlayerHead,
 };
 use crate::utils::entities_ordered_by_type;
 

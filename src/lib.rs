@@ -15,7 +15,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
 use self::consts::TRACK_LENGTH;
-use self::global_types::{AppState, GameBoundaries, GameOver, PlayerStatus, MenuState};
+use self::global_types::{AppState, GameBoundaries, GameOver, MenuState, PlayerStatus};
 
 pub struct GamePlugin;
 

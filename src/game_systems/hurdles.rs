@@ -6,7 +6,9 @@ use rand::prelude::SliceRandom;
 use rand::Rng;
 
 use crate::consts::{BEFORE_FIRST, HURDLE_HEIGHT, HURDLE_SPACING, HURDLE_WIDTH};
-use crate::global_types::{AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, Player, MenuState};
+use crate::global_types::{
+    AppState, DespawnWithLevel, GameBoundaries, GameOver, Hurdle, MenuState, Player,
+};
 use crate::loading::TextureAssets;
 use crate::utils::entities_ordered_by_type;
 

@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::global_types::{
-    AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, Player, PlayerHead,
-    PlayerSprite, PlayerStatus, MenuState,
+    AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, MenuState, Player,
+    PlayerHead, PlayerSprite, PlayerStatus,
 };
 use crate::loading::TextureAssets;
 

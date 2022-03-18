@@ -7,7 +7,7 @@ mod pogo;
 use bevy::ecs::schedule::ShouldRun;
 use bevy::prelude::*;
 
-use crate::global_types::{AppState, DespawnWithLevel, GameOver, PlayerStatus, MenuState};
+use crate::global_types::{AppState, DespawnWithLevel, GameOver, MenuState, PlayerStatus};
 
 pub struct GameSystemsPlugin;
 
