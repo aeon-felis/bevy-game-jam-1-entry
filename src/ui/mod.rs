@@ -90,7 +90,7 @@ fn main_menu(
             state.set(AppState::ClearLevelAndThenLoad).unwrap();
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().kbgp_activated() {
+        if ui.button("Exit").kbgp_navigation().clicked() {
             exit.send(bevy::app::AppExit);
         }
     });
@@ -106,20 +106,16 @@ fn pause_menu(
             .button("Resume")
             .kbgp_navigation()
             .kbgp_initial_focus()
-            .kbgp_activated()
+            .clicked()
         {
             state.set(AppState::Game).unwrap();
         }
-        if ui.button("Main Menu").kbgp_navigation().kbgp_activated() {
+        if ui.button("Main Menu").kbgp_navigation().clicked() {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
-            // Todo: remove this once I solve the bug where it keeps get pressed
-            let focus = ui.memory().focus();
-            if let Some(focus) = focus {
-                ui.memory().surrender_focus(focus);
-            }
+            ui.kbgp_clear_input();
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().kbgp_activated() {
+        if ui.button("Exit").kbgp_navigation().clicked() {
             exit.send(bevy::app::AppExit);
         }
     });
@@ -137,40 +133,37 @@ fn game_over_menu(
             .button("Main Menu")
             .kbgp_navigation()
             .kbgp_initial_focus()
-            .kbgp_activated()
+            .clicked()
         {
             state.set(AppState::Menu(MenuState::Main)).unwrap();
-            // Todo: remove this once I solve the bug where it keeps get pressed
-            let focus = ui.memory().focus();
-            if let Some(focus) = focus {
-                ui.memory().surrender_focus(focus);
-            }
+            ui.kbgp_clear_input();
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("Exit").kbgp_navigation().kbgp_activated() {
+        if ui.button("Exit").kbgp_navigation().clicked() {
             exit.send(bevy::app::AppExit);
         }
         if let Some(game_over) = game_over_state.current() {
+            ui.style_mut().visuals.override_text_color = Some(egui::Color32::WHITE);
             match game_over {
                 GameOver::Injured => {
-                    ui.label("INJURED!"); // TODO: Make this red
+                    ui.colored_label(egui::Color32::RED, "INJURED!");
                     ui.label(format!(
                         "Traveled {:.1}m before hitting your head",
                         player_status.distance_traveled
                     ));
                 }
                 GameOver::Disqualified => {
-                    ui.label("DISQUALIFIED!"); // TODO: Make this red
+                    ui.colored_label(egui::Color32::RED, "DISQUALIFIED!");
                     ui.label(format!(
                         "Traveled {:.1}m before hitting a hurdle",
                         player_status.distance_traveled
                     ));
                 }
                 GameOver::WrongWay => {
-                    ui.label("that's the wrong way..."); // TODO: Make this red
+                    ui.colored_label(egui::Color32::RED, "that's the wrong way...");
                 }
                 GameOver::FinishLine => {
-                    ui.label("FINISH!"); // TODO: Make this green
+                    ui.colored_label(egui::Color32::GREEN, "FINISH!");
                     ui.label(format!(
                         "Finished in {}, place {} out of {}",
                         player_status.format_time(),

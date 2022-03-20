@@ -22,6 +22,6 @@ fn main() {
     app.add_plugin(benimator::AnimationPlugin::default());
     app.add_plugin(bevy_egui_kbgp::bevy_egui::EguiPlugin);
     app.insert_resource(bevy_egui_kbgp::bevy_egui::EguiSettings { scale_factor: 2.0 });
-    app.add_system(bevy_egui_kbgp::kbgp_system_default_input);
+    app.add_plugin(bevy_egui_kbgp::KbgpPlugin);
     app.run();
 }
