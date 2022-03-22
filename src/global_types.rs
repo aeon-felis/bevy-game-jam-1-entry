@@ -1,6 +1,8 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use ezinput_macros::BindingTypeView;
+use ezinput::prelude::BindingTypeView;
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
 pub enum AppState {
@@ -23,6 +25,12 @@ pub enum GameOver {
     Disqualified,
     WrongWay,
     FinishLine,
+}
+
+#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum InputBinding {
+    Rotate,
+    Pause,
 }
 
 pub struct GameBoundaries {

@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use ezinput::prelude::*;
 
 use crate::global_types::{
     AppState, CameraFollowTarget, DespawnWithLevel, GameBoundaries, GameOver, MenuState, Player,
-    PlayerHead, PlayerSprite, PlayerStatus,
+    PlayerHead, PlayerSprite, PlayerStatus, InputBinding,
 };
 use crate::loading::TextureAssets;
 
@@ -106,7 +107,7 @@ fn spawn_player(mut commands: Commands, texture_assets: Res<TextureAssets>) {
 
 fn player_controls(
     time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
+    input_views: Query<&InputView<InputBinding>>,
     mut query: Query<
         (
             &mut RigidBodyVelocityComponent,
@@ -115,12 +116,12 @@ fn player_controls(
         With<PlayerSprite>,
     >,
 ) {
+    let input_view = input_views.get_single().unwrap();
     let mut spin_value = 0.0;
-    if keyboard_input.pressed(KeyCode::Left) {
-        spin_value += 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::Right) {
-        spin_value -= 1.0;
+    for axis_value in input_view.axis(&InputBinding::Rotate) {
+        if !axis_value.1.released() {
+            spin_value += axis_value.0
+        }
     }
     let torque = time.delta().as_secs_f32() * 30.0 * spin_value;
     for (mut velocity, mass_props) in query.iter_mut() {

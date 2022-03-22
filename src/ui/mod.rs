@@ -1,14 +1,18 @@
 mod score;
+mod input;
 
 use bevy::prelude::*;
 use bevy_egui_kbgp::bevy_egui::EguiContext;
 use bevy_egui_kbgp::egui;
 use bevy_egui_kbgp::prelude::*;
+use ezinput::prelude::*;
 
+use crate::global_types::InputBinding;
 use crate::global_types::MenuState;
 use crate::global_types::{AppState, GameOver, PlayerStatus};
 // use crate::loading::FontAssets;
 use crate::ui::score::ScorePlugin;
+use crate::ui::input::InputPlugin;
 
 pub struct UiPlugin;
 
@@ -17,6 +21,7 @@ impl Plugin for UiPlugin {
         app.add_startup_system(setup_ui);
 
         app.add_plugin(ScorePlugin);
+        app.add_plugin(InputPlugin);
 
         app.add_system_set(
             SystemSet::on_update(AppState::Menu(MenuState::Main)).with_system(main_menu),
@@ -43,12 +48,11 @@ fn setup_ui(mut commands: Commands) {
 }
 
 fn pause_unpause_game(
-    mut keyboard_input: ResMut<Input<KeyCode>>,
+    input_views: Query<&InputView<InputBinding>>,
     mut state: ResMut<State<AppState>>,
 ) {
-    if keyboard_input.pressed(KeyCode::Escape) {
-        keyboard_input.reset(KeyCode::Escape);
-    } else {
+    let input_view = input_views.get_single().unwrap();
+    if !input_view.key(&InputBinding::Pause).just_pressed() {
         return;
     }
     match state.current() {
