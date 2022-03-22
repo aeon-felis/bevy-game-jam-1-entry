@@ -16,13 +16,16 @@ impl Plugin for InputPlugin {
 fn setup_input(mut commands: Commands) {
     let mut view = InputView::empty();
 
-    view.add_binding({
-        ActionBinding::from(InputBinding::Rotate)
-            .receiver(BindingInputReceiver::KeyboardKey(KeyCode::Left))
-            .default_axis_value(BindingInputReceiver::KeyboardKey(KeyCode::Left), 1.0)
-            .receiver(BindingInputReceiver::KeyboardKey(KeyCode::Right))
-            .default_axis_value(BindingInputReceiver::KeyboardKey(KeyCode::Right), -1.0)
-    });
+    let mut binding = ActionBinding::from(InputBinding::Rotate);
+    for (input, axis_value) in [
+        (BindingInputReceiver::KeyboardKey(KeyCode::Left), 1.0),
+        (BindingInputReceiver::KeyboardKey(KeyCode::A), 1.0),
+        (BindingInputReceiver::KeyboardKey(KeyCode::Right), -1.0),
+        (BindingInputReceiver::KeyboardKey(KeyCode::D), -1.0),
+    ] {
+        binding.receiver(input).default_axis_value(input, axis_value);
+    }
+    view.add_binding(&binding);
 
     view.add_binding({
         ActionBinding::from(InputBinding::Pause)
