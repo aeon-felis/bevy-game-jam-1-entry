@@ -51,19 +51,17 @@ fn pause_unpause_game(
     input_views: Query<&InputView<InputBinding>>,
     mut state: ResMut<State<AppState>>,
 ) {
-    let input_view = input_views.get_single().unwrap();
-    if !input_view.key(&InputBinding::Pause).just_pressed() {
-        return;
-    }
-    match state.current() {
-        AppState::Menu(MenuState::Pause) => {
-            state.set(AppState::Game).unwrap();
-        }
-        AppState::Menu(_) => {}
-        AppState::ClearLevelAndThenLoad => {}
-        AppState::LoadLevel => {}
-        AppState::Game => {
-            state.set(AppState::Menu(MenuState::Pause)).unwrap();
+    if input_views.iter().any(|input_view| input_view.key(&InputBinding::Pause).just_pressed()) {
+        match state.current() {
+            AppState::Menu(MenuState::Pause) => {
+                state.set(AppState::Game).unwrap();
+            }
+            AppState::Menu(_) => {}
+            AppState::ClearLevelAndThenLoad => {}
+            AppState::LoadLevel => {}
+            AppState::Game => {
+                state.set(AppState::Menu(MenuState::Pause)).unwrap();
+            }
         }
     }
 }

@@ -244,9 +244,9 @@ dependencies = [
 
 [[package]]
 name = "bevy-egui-kbgp"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd7fb1fd11daadfee2e05fb29e65528dcc5d8e090c7f8e6cbd1616bae471950d"
+checksum = "b7081a48e7da9236aa839aa09b0abc4dd79976c465ffbebb13cf29439f02e131"
 dependencies = [
  "bevy",
  "bevy_egui",

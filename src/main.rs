@@ -3,6 +3,7 @@
 
 use bevy::prelude::{App, ClearColor, Color, Msaa, WindowDescriptor};
 use bevy::DefaultPlugins;
+use bevy_egui_kbgp::{KbgpPlugin, KbgpSettings, KbgpNavBindings};
 use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
 use pogo_hurdling::GamePlugin;
 
@@ -22,6 +23,14 @@ fn main() {
     app.add_plugin(benimator::AnimationPlugin::default());
     app.add_plugin(bevy_egui_kbgp::bevy_egui::EguiPlugin);
     app.insert_resource(bevy_egui_kbgp::bevy_egui::EguiSettings { scale_factor: 2.0 });
-    app.add_plugin(bevy_egui_kbgp::KbgpPlugin);
+    app.add_plugin(KbgpPlugin);
+    app.insert_resource(KbgpSettings {
+        allow_keyboard: true,
+        allow_mouse_buttons: true,
+        allow_mouse_wheel: true,
+        allow_mouse_wheel_sideways: true,
+        allow_gamepads: true,
+        bindings: KbgpNavBindings::default().with_wasd_navigation(),
+    });
     app.run();
 }

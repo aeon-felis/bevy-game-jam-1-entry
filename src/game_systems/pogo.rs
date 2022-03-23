@@ -116,16 +116,22 @@ fn player_controls(
         With<PlayerSprite>,
     >,
 ) {
-    let input_view = input_views.get_single().unwrap();
     let mut spin_value = 0.0;
-    for axis_value in input_view.axis(&InputBinding::Rotate) {
-        if !axis_value.1.released() {
-            spin_value += axis_value.0
+    let mut num_participating = 0;
+    for input_view in input_views.iter() {
+        for axis_value in input_view.axis(&InputBinding::Rotate) {
+            if !axis_value.1.released() {
+                num_participating += 1;
+                spin_value -= axis_value.0
+            }
         }
     }
-    let torque = time.delta().as_secs_f32() * 30.0 * spin_value;
-    for (mut velocity, mass_props) in query.iter_mut() {
-        velocity.apply_torque_impulse(mass_props, torque);
+    if 0 < num_participating {
+        spin_value /= num_participating as f32;
+        let torque = time.delta().as_secs_f32() * 30.0 * spin_value;
+        for (mut velocity, mass_props) in query.iter_mut() {
+            velocity.apply_torque_impulse(mass_props, torque);
+        }
     }
 }
 
