@@ -1,6 +1,6 @@
 [package]
 name = "pogo_hurdling"
-version = "0.2.0"
+version = "0.3.0"
 publish = false
 authors = ["Idan Arye <idanarye@gmail.com>"]
 edition = "2021"
